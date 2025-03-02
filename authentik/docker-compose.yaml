@@ -63,8 +63,8 @@ services:
       - AUTHENTIK_ERROR_REPORTING_ENABLED=true # Enables reporting
       - AUTHENTIK_SECRET_KEY=${AUTHENTIK_SECRET_KEY}
     volumes:
-      - ./media:/media
-      - ./custom-templates:/templates
+      - authentik-media:/media
+      - authentik-custom-templates:/templates
     env_file:
       - .env
     depends_on:
@@ -101,9 +101,9 @@ services:
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./media:/media
-      - ./certs:/certs
-      - ./custom-templates:/templates
+      - authentikmedia:/media
+      - certs:/certs
+      - authentik-custom-templates:/templates
     env_file:
       - .env
     depends_on:
@@ -117,6 +117,10 @@ volumes:
     driver: local
   redis:
     driver: local
+  authentik-custom-templates:
+  authentik-media:
+  certs:
+  
 
 networks:
   proxy:
