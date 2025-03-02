@@ -1,0 +1,19 @@
+exclude:
+  platforms: []
+  roms:
+    multi_file:
+      names: []
+      parts:
+        extensions: []
+        names: []
+    single_file:
+      extensions: []
+      names: []
+filesystem:
+  roms_folder: roms
+system:
+  platforms:
+    gba: gba
+  versions:
+    gba: gba
+    nds: nds
