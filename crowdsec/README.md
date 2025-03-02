@@ -12,4 +12,13 @@ Ensure that traefik logs can be accessed by the container.
 ***
 
 ### Traefik ForwardAuth
-We need to add a middleware to our traefik config. ```nano /home/hughboi/traefik/data config.yml```
+We need to add a middleware to our traefik config. ```nano /home/hughboi/traefik/data/config.yml```
+
+```
+http:
+  middlewares:    
+    crowdsec-bouncer:
+      forwardauth:
+        address: http://bouncer-traefik:8080/api/v1/forwardAuth
+        trustForwardHeader: true
+```
