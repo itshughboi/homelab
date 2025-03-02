@@ -27,6 +27,7 @@ endpoint-applications: &applications
     - "[CERTIFICATE_EXPIRATION] > 48h" # Will fail if certificate is expiring soon
   alerts:
     - type: discord
+    - type: ntfy
 
 
 endpoint-server: &server
@@ -36,6 +37,7 @@ endpoint-server: &server
     - "[CONNECTED] == true"
   alerts:
     - type: discord
+    - type: ntfy
 
 
 endpoint-security: &security
@@ -45,7 +47,7 @@ endpoint-security: &security
     - "[CONNECTED] == true"
   alerts:
     - type: discord
-
+    - type: ntfy
 
 
 
@@ -65,6 +67,10 @@ endpoints:
     <<: *server
     url: "tcp://10.10.10.3:8006"
 
+  - name: pve-srv-4 - tcp
+    <<: *server
+    url: "tcp://10.10.10.4:8006"
+
   - name: PBS - tcp
     <<: *server
     url: "tcp://10.10.10.6:8007"
@@ -73,29 +79,17 @@ endpoints:
     <<: *server
     url: "icmp://10.10.10.10"
 
-  - name: ubnt-staging - icmp
-    <<: *server
-    url: "icmp://10.10.10.20"
-
-  - name: ubnt-dev - icmp
-    <<: *server
-    url: "icmp://10.10.10.30" 
-
   - name: bind9 - tcp
     <<: *server
     url: "tcp://10.10.10.9:53"  
 
-  - name: Database (Parent) - icmp
+  - name: HAPostgres VIP - icmp
     <<: *server
     url: "icmp://10.10.10.7"
 
-  - name: Postgres - tcp
+  - name: automation Athena
     <<: *server
-    url: "tcp://10.10.10.7:5432"
-
-  - name: automation
-    <<: *server
-    url: "icmp://10.10.10.40"
+    url: "icmp://10.10.10.8"
     
   - name: TrueNAS - icmp
     group: Servers
@@ -105,65 +99,53 @@ endpoints:
       - "[CONNECTED] == true"
     alerts:
       - type: discord
+      - type: ntfy
 
 ### Applications
   - name: Adguard - https
     <<: *applications
-    url: "https://adguard.hughboi-staging.cc"
+    url: "https://adguard.hughboi.cc"
 
   - name: Authentik - https
     <<: *applications
-    url: "https://authentik.hughboi-staging.cc"
-
-  - name: Change Detection - https
-    <<: *applications
-    url: "https://change.hughboi-staging.cc"
+    url: "https://authentik.hughboi.cc"
 
   - name: Duplicati - https
     <<: *applications
-    url: "https://duplicati.hughboi-staging.cc"
+    url: "https://duplicati.hughboi.cc"
   
   - name: Grafana - https
     <<: *applications
-    url: "https://grafana.hughboi-staging.cc"
+    url: "https://grafana.hughboi.cc"
 
   - name: Homepage - https
     <<: *applications
-    url: "https://home.hughboi-staging.cc"
+    url: "https://home.hughboi.cc"
 
   - name: Immich - https
     <<: *applications
-    url: "https://immich.hughboi-staging.cc"
+    url: "https://immich.hughboi.cc"
 
   - name: InfluxDB - https
     <<: *applications
-    url: "https://influx.hughboi-staging.cc"
+    url: "https://influx.hughboi.cc"
 
   # - name: Loki - tcp
   #   <<: *applications
   #   url: "tcp://loki:3100/loki/api/v1/push" # :9096
 
-  - name: Kasm - icmp
-    <<: *applications
-    url: "icmp://10.10.10.80"
-    conditions:
-      - "[CONNECTED] == true"
-
-  - name: Linkding - https
-    <<: *applications
-    url: "https://linkding.hughboi-staging.cc"
 
   - name: Netdata Homepage - https
     <<: *applications
-    url: "https://netdata.hughboi-staging.cc"
+    url: "https://netdata.hughboi.cc"
 
   - name: Ntfy - https
     <<: *applications
-    url: "https://ntfy.hughboi-staging.cc"
+    url: "https://ntfy.hughboi.cc"
 
   - name: Prometheus - https
     <<: *applications
-    url: "https://prometheus.hughboi-staging.cc"
+    url: "https://prometheus.hughboi.cc"
 
   # - name: Promtail - tcp
   #   <<: *applications
@@ -171,31 +153,23 @@ endpoints:
 
   - name: Speedtest - https
     <<: *applications
-    url: "https://speed.hughboi-staging.cc"
+    url: "https://speed.hughboi.cc"
   
   - name: Syncthing - https
     <<: *applications
-    url: "https://syncthing.hughboi-staging.cc"
-  
-  - name: Teleport - https
-    <<: *applications
-    url: "https://teleport.hughboi-staging.cc"
+    url: "https://syncthing.hughboi.cc"
 
   - name: Traefik - https
     <<: *applications
-    url: "https://traefik.hughboi-staging.cc"
+    url: "https://traefik.hughboi.cc"
 
   - name: Vaultwarden - https
     <<: *applications
-    url: "https://vaultwarden.hughboi-staging.cc"
-
-  - name: Webmin Prod - https
-    <<: *applications
-    url: "https://10.10.10.20:10000"
+    url: "https://vaultwarden.hughboi.cc"
 
   - name: Whoogle - https
     <<: *applications
-    url: "https://whoogle.hughboi-staging.cc"
+    url: "https://whoogle.hughboi.cc"
 
 
 
@@ -206,5 +180,5 @@ endpoints:
   
   - name: Wazuh - https
     <<: *security
-    url: "https://wazuh.hughboi-staging.cc"
+    url: "https://wazuh.hughboi.cc"
 
