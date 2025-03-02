@@ -64,13 +64,3 @@ networks:
   proxy:
     external: true
 
-
-
-    ###
-    ### I want to add logging for both traefik itself and also the accesslog for Loki. That would look something like this:
-    ### log:
-    ###   level: "INFO"
-    ###   filepath: "/var/log/traefik/traefik.log"
-    ### accessLog:
-    ###   filepath: "/var/log/traefik/accesslog"
-    ###
