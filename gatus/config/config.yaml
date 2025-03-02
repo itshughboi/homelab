@@ -11,8 +11,9 @@ alerting:
       send-on-resolved: true
       failure-threshold: 2
       success-threshold: 1
+      
   ntfy:
-    topic: Gatus
+    topic: gatus
     url: https://ntfy.hughboi.cc/gatus
     priority: 3
 
@@ -23,7 +24,7 @@ endpoint-applications: &applications
     timeout: 10s
   conditions:
     - "[STATUS] == 200"
-    # - "[CERTIFICATE_EXPIRATION] > 48h" # Will fail if certificate is expiring soon
+    - "[CERTIFICATE_EXPIRATION] > 48h" # Will fail if certificate is expiring soon
   alerts:
     - type: discord
 
@@ -54,19 +55,19 @@ endpoints:
 ### Servers
   - name: pve-srv-1 - tcp
     <<: *server
-    url: "tcp://10.10.10.2:8006"
+    url: "tcp://10.10.10.1:8006"
   
   - name: pve-srv-2 - tcp
     <<: *server
-    url: "tcp://10.10.10.3:8006"
+    url: "tcp://10.10.10.2:8006"
 
   - name: pve-srv-3 - tcp
     <<: *server
-    url: "tcp://10.10.10.4:8006"
+    url: "tcp://10.10.10.3:8006"
 
   - name: PBS - tcp
     <<: *server
-    url: "tcp://10.10.10.152:8007"
+    url: "tcp://10.10.10.6:8007"
 
   - name: ubnt-prod - icmp
     <<: *server
