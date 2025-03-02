@@ -9,7 +9,7 @@ services:
       RUN_ON_STARTUP: "true" #change to true if i want a backup when a container starts
       BACKUP_CRON: "0 */12 * * *" #this is twice daily, i.e., every 12 hours (incremental)
       RESTIC_REPOSITORY: /restic
-      RESTIC_PASSWORD: MY_SUPER_LONG_PASSWORD
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
       RESTIC_BACKUP_SOURCES: /mnt/volumes
       RESTIC_COMPRESSION: auto 
       RESTIC_BACKUP_ARGS: >-
@@ -22,8 +22,8 @@ services:
       #  --keep-daily 7
       TZ: America/Denver
     volumes:
-      - ./truenas-restic:/restic #Where backups are to be stored
-      - ./truenas-restic/tmp-for-restore:/tmp-for-restore #USE THIS FOLDER FOR RESTORE - CAN VIEW EACH CONTAINER
+      - /mnt/truenas-restic:/restic #Where backups are to be stored
+      - /mnt/truenas-restic/tmp-for-restore:/tmp-for-restore #USE THIS FOLDER FOR RESTORE - CAN VIEW EACH CONTAINER
       - /home/hughboi:/mnt/volumes:ro #specify what I want restic to backup. e.g. backup /home/hughboi
     security_opt:
       - no-new-privileges:true
@@ -36,7 +36,7 @@ services:
       RUN_ON_STARTUP: "true"
       PRUNE_CRON: "0 0 4 * * *"
       RESTIC_REPOSITORY: /restic
-      RESTIC_PASSWORD: MY_SUPER_LONG_PASSWORD
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
       TZ: America/Denver
     security_opt:
       - no-new-privileges:true
@@ -51,7 +51,7 @@ services:
       RESTIC_CHECK_ARGS: >-
         --read-data-subset=10%
       RESTIC_REPOSITORY: /restic
-      RESTIC_PASSWORD: MY_SUPER_LONG_PASSWORD
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
       TZ: America/Denver
     security_opt:
       - no-new-privileges:true
