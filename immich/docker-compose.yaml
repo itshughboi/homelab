@@ -19,6 +19,7 @@ services:
       - /mnt/truenas-pics:/mnt/photos:ro #ro makes it read-only so I can't delete anything from Immich
     depends_on:
       - redis
+      - database
     labels:
       - traefik.enable=true
       - traefik.http.routers.immich.entrypoints=http
