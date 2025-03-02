@@ -1,0 +1,14 @@
+id: discord
+url: http://ubnt-prod:29334
+as_token: 
+hs_token: 
+sender_localpart: 
+rate_limited: false
+namespaces:
+    users:
+        - regex: ^@discordbot:matrix\.hughboi\.cc$
+          exclusive: true
+        - regex: ^@discord_.*:matrix\.hughboi\.cc$
+          exclusive: true
+de.sorunome.msc2409.push_ephemeral: true
+push_ephemeral: true
