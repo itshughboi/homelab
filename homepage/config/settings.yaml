@@ -1,0 +1,74 @@
+title: Home
+theme: dark
+color: slate
+ # <----- add this line # <----- add this line
+hideVersion: true
+background:
+  image: https://raw.githubusercontent.com/DenverCoder1/minimalistic-wallpaper-collection/main/images/byrotek-mountain-view.png
+  blur: sm # sm, "", md, xl... see https://tailwindcss.com/docs/backdrop-blur
+  saturate: 30 # 0, 50, 100... see https://tailwindcss.com/docs/backdrop-saturate
+  brightness: 85 # 0, 50, 75... see https://tailwindcss.com/docs/backdrop-brightness
+  opacity: 35 # 0-100
+useEqualHeights: true
+statusStyle: "dot" #This can show ms if you clear this line out or you can change it to "basic" for UP or DOWN
+showStats: true
+hideErrors: true
+headerStyle: clean
+layout:
+  Servers:
+    style: row
+    columns: 5
+    icon: 
+
+  Management:
+    style: row
+    columns: 5
+    # icon: mdi-server-network-#FFFFFF
+
+  Networking:
+    style: row
+    columns: 5
+    icon: mdi-network-#FFFFFF
+      
+  Apps:
+    style: column
+  
+  Monitoring:
+    style: column
+  
+  Data:
+    style: column
+  
+  Security:
+    style: column
+#   Security:
+#     # style: row
+#     # columns: 5
+#     icon: mdi-shield-lock-#FFFFFF
+    
+#   Monitoring:
+#     # style: row
+#     # columns: 5
+#     icon: mdi-chart-line-#FFFFFF
+
+#   Apps:
+#     # style: row
+#     # columns: 5
+#     icon: mdi-apps-#FFFFFF
+
+#   Data:
+#     style: row
+#     columns: 5
+#     icon: mdi-nas-#FFFFFF
+    
+#   Automation:
+#     style: row
+#     columns: 5
+
+#   providers:
+#     openweathermap: openweathermapapikey
+#     weatherapi: weatherapiapikey
+
+  Storage:
+    style: row
+    columns: 5
