@@ -5,7 +5,7 @@ storage:
 
 alerting:
   discord:
-    webhook-url: "https://discord.com/api/webhooks/1286436908691492996/GzO6SnATFfXMYAB5kpZoOnUpvjvZzYWQX6CDHePJao0Zl0hsYjmZtChCe5IKt_nxvF3I"
+    webhook-url: "https://discord.com/api/webhooks/1286##########/GzO6##############################"
     default-alert:
       description: "Health Check Failed"
       send-on-resolved: true
@@ -93,7 +93,7 @@ endpoints:
     
   - name: TrueNAS - icmp
     group: Servers
-    url: "icmp://10.10.10.5" #"tcp://10.10.10.5:449/"
+    url: "icmp://10.10.10.5"
     interval: 30s
     conditions:
       - "[CONNECTED] == true"
