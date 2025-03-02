@@ -1,1 +1,1 @@
-### Moving away from this to Actual Budget. It's simpler and has a more pleasant UI imo
+### Moving away from this to Actual Budget. It's simpler and has a more pleasant UI imo. Only reason I went with this was for the importer service, but I didn't use it. It needed to be formatted a lot to work well. Not worth my time rn.
