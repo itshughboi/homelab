@@ -33,6 +33,7 @@ services:
       - "traefik.docker.network=proxy"
     networks:
       - proxy
+      - hoarder
 
   chrome:
     container_name: hoarder-chrome
@@ -46,24 +47,23 @@ services:
       - --remote-debugging-port=9222
       - --hide-scrollbars
     networks:
-      - proxy  # Added network
+      - hoarder
 
   meilisearch:
     container_name: hoarder-search
     image: getmeili/meilisearch:latest
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       MEILI_NO_ANALYTICS: "true"
     volumes:
       - meilisearch:/meili_data
     networks:
-      - proxy  # Added network
+      - hoarder
 
 networks:
   proxy:
     external: true
+  hoarder:
 
 volumes:
   meilisearch:
