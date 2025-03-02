@@ -18,9 +18,9 @@ services:
       GID: "${GID-1000}"
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
     volumes:
-      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
-      - ./db:/var/lib/crowdsec/data/
-      - ./config:/etc/crowdsec/
+      - ./config/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - crowdsec-db:/var/lib/crowdsec/data/
+      - crowdsec-config:/etc/crowdsec/
       - /home/hughboi/traefik/logs:/var/log/traefik/:ro
     networks:
       - proxy
@@ -44,4 +44,9 @@ networks:
   proxy:
     external: true
   homepage:
+    external: true
+
+volumes:
+  crowdsec-db:
+  crowdsec-config:
     external: true
