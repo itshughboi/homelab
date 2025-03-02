@@ -16,10 +16,9 @@ services:
         mode: "non-blocking"
     volumes:
       - upload:/usr/src/app/upload
-      - /mnt/immich-truenas:/mnt/photos
+      - /mnt/truenas-pics:/mnt/photos:ro #ro makes it read-only so I can't delete anything from Immich
     depends_on:
       - redis
-      - database
     labels:
       - traefik.enable=true
       - traefik.http.routers.immich.entrypoints=http
@@ -41,14 +40,14 @@ services:
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
     restart: unless-stopped
     volumes:
-      - ./model-cache:/cache
+      - model-cache:/cache
     networks:
       - immich
 
       
   redis:
     container_name: immich_redis
-    image: redis:6.2-alpine@sha256:70a7a5b641117670beae0d80658430853896b5ef269ccf00d1827427e3263fa3
+    image: redis:6.2-alpine
     restart: unless-stopped
     networks:
       - immich
@@ -62,10 +61,5 @@ networks:
 
 volumes:
   upload:
+  model-cache:
 
-#   nfs-share:
-#     driver: local
-#     driver_opts:
-#       type: nfs
-#       o: addr=10.10.10.5,rw
-#       device: :/mnt/The Archive/Epoch-1/Backup/Pictures
