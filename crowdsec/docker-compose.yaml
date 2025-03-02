@@ -1,0 +1,47 @@
+services:
+  crowdsec:
+    container_name: crowdsec
+    image: crowdsecurity/crowdsec:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    environment:
+      GID: "${GID-1000}"
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/traefik"
+    volumes:
+      - ./acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ./db:/var/lib/crowdsec/data/
+      - ./config:/etc/crowdsec/
+      - /home/hughboi/traefik/logs:/var/log/traefik/:ro
+    networks:
+      - proxy
+      - homepage
+
+  bouncer-traefik:
+    container_name: bouncer-traefik
+    image: docker.io/fbonalair/traefik-crowdsec-bouncer:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      CROWDSEC_BOUNCER_API_KEY:
+      CROWDSEC_AGENT_HOST: crowdsec:8080
+    networks:
+      - proxy
+    depends_on:
+      - crowdsec
+
+networks:
+  proxy:
+    external: true
+  homepage:
+    external: true
