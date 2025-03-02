@@ -3,6 +3,8 @@ services:
     container_name: gatus
     image: twinproduction/gatus:v5.12.1
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     logging:
       driver: loki
       options:
