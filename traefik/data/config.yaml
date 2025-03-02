@@ -1,0 +1,26 @@
+# http:
+#   middlewares:
+#     # duplicati-https-redirect:
+#     #   redirectScheme:
+#     #     scheme: "https"
+#     #     permanent: true
+
+#     adguard-https-redirect:
+#       redirectScheme:
+#         scheme: "https"
+#         permanent: true
+  
+#     authentik:
+#       forwardauth:
+#         address: "https://authentik.hughboi.cc/application/o/authorize/"
+#         authResponseHeaders:
+#           - "X-Auth-Token"  # This header can be passed to your backend if needed
+#         trustForwardHeader: true  # This is optional, depending on your setup
+
+
+http:
+  middlewares:    
+    crowdsec-bouncer:
+      forwardauth:
+        address: http://bouncer-traefik:8080/api/v1/forwardAuth
+        trustForwardHeader: true
