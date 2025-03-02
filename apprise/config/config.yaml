@@ -1,0 +1,5 @@
+urls:
+  - ${DISCORD_URL}
+  - ${GOTIFY_URL}
+  - ${NTFY_URL}
+  - ${MATRIX_URL}
