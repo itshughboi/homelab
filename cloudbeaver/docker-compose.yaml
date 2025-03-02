@@ -29,7 +29,6 @@ services:
       - "traefik.http.routers.cloudbeaver-secure.tls=true"
       - "traefik.http.services.cloudbeaver.loadbalancer.server.port=8978" # Update to the correct port
       - "traefik.docker.network=proxy"
-    restart: unless-stopped
     networks:
       - proxy
 
