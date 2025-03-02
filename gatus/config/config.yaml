@@ -1,0 +1,209 @@
+storage:
+  type: postgres
+  path: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@10.10.10.7:5432/${POSTGRES_DB}?sslmode=disable"
+
+
+alerting:
+  discord:
+    webhook-url: "https://discord.com/api/webhooks/1286436908691492996/GzO6SnATFfXMYAB5kpZoOnUpvjvZzYWQX6CDHePJao0Zl0hsYjmZtChCe5IKt_nxvF3I"
+    default-alert:
+      description: "Health Check Failed"
+      send-on-resolved: true
+      failure-threshold: 2
+      success-threshold: 1
+  ntfy:
+    topic: Gatus
+    url: https://ntfy.hughboi.cc/gatus
+    priority: 3
+
+endpoint-applications: &applications
+  group: Applications
+  interval: 30s
+  client:
+    timeout: 10s
+  conditions:
+    - "[STATUS] == 200"
+    # - "[CERTIFICATE_EXPIRATION] > 48h" # Will fail if certificate is expiring soon
+  alerts:
+    - type: discord
+
+
+endpoint-server: &server
+  group: Servers
+  interval: 30s
+  conditions:
+    - "[CONNECTED] == true"
+  alerts:
+    - type: discord
+
+
+endpoint-security: &security
+  group: Security
+  interval: 30s
+  conditions:
+    - "[CONNECTED] == true"
+  alerts:
+    - type: discord
+
+
+
+
+
+endpoints:
+
+### Servers
+  - name: pve-srv-1 - tcp
+    <<: *server
+    url: "tcp://10.10.10.2:8006"
+  
+  - name: pve-srv-2 - tcp
+    <<: *server
+    url: "tcp://10.10.10.3:8006"
+
+  - name: pve-srv-3 - tcp
+    <<: *server
+    url: "tcp://10.10.10.4:8006"
+
+  - name: PBS - tcp
+    <<: *server
+    url: "tcp://10.10.10.152:8007"
+
+  - name: ubnt-prod - icmp
+    <<: *server
+    url: "icmp://10.10.10.10"
+
+  - name: ubnt-staging - icmp
+    <<: *server
+    url: "icmp://10.10.10.20"
+
+  - name: ubnt-dev - icmp
+    <<: *server
+    url: "icmp://10.10.10.30" 
+
+  - name: bind9 - tcp
+    <<: *server
+    url: "tcp://10.10.10.9:53"  
+
+  - name: Database (Parent) - icmp
+    <<: *server
+    url: "icmp://10.10.10.7"
+
+  - name: Postgres - tcp
+    <<: *server
+    url: "tcp://10.10.10.7:5432"
+
+  - name: automation
+    <<: *server
+    url: "icmp://10.10.10.40"
+    
+  - name: TrueNAS - icmp
+    group: Servers
+    url: "icmp://10.10.10.5" #"tcp://10.10.10.5:449/"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: discord
+
+### Applications
+  - name: Adguard - https
+    <<: *applications
+    url: "https://adguard.hughboi-staging.cc"
+
+  - name: Authentik - https
+    <<: *applications
+    url: "https://authentik.hughboi-staging.cc"
+
+  - name: Change Detection - https
+    <<: *applications
+    url: "https://change.hughboi-staging.cc"
+
+  - name: Duplicati - https
+    <<: *applications
+    url: "https://duplicati.hughboi-staging.cc"
+  
+  - name: Grafana - https
+    <<: *applications
+    url: "https://grafana.hughboi-staging.cc"
+
+  - name: Homepage - https
+    <<: *applications
+    url: "https://home.hughboi-staging.cc"
+
+  - name: Immich - https
+    <<: *applications
+    url: "https://immich.hughboi-staging.cc"
+
+  - name: InfluxDB - https
+    <<: *applications
+    url: "https://influx.hughboi-staging.cc"
+
+  # - name: Loki - tcp
+  #   <<: *applications
+  #   url: "tcp://loki:3100/loki/api/v1/push" # :9096
+
+  - name: Kasm - icmp
+    <<: *applications
+    url: "icmp://10.10.10.80"
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: Linkding - https
+    <<: *applications
+    url: "https://linkding.hughboi-staging.cc"
+
+  - name: Netdata Homepage - https
+    <<: *applications
+    url: "https://netdata.hughboi-staging.cc"
+
+  - name: Ntfy - https
+    <<: *applications
+    url: "https://ntfy.hughboi-staging.cc"
+
+  - name: Prometheus - https
+    <<: *applications
+    url: "https://prometheus.hughboi-staging.cc"
+
+  # - name: Promtail - tcp
+  #   <<: *applications
+  #   url: "tcp://10.10.10.10:9080"
+
+  - name: Speedtest - https
+    <<: *applications
+    url: "https://speed.hughboi-staging.cc"
+  
+  - name: Syncthing - https
+    <<: *applications
+    url: "https://syncthing.hughboi-staging.cc"
+  
+  - name: Teleport - https
+    <<: *applications
+    url: "https://teleport.hughboi-staging.cc"
+
+  - name: Traefik - https
+    <<: *applications
+    url: "https://traefik.hughboi-staging.cc"
+
+  - name: Vaultwarden - https
+    <<: *applications
+    url: "https://vaultwarden.hughboi-staging.cc"
+
+  - name: Webmin Prod - https
+    <<: *applications
+    url: "https://10.10.10.20:10000"
+
+  - name: Whoogle - https
+    <<: *applications
+    url: "https://whoogle.hughboi-staging.cc"
+
+
+
+## Security
+  - name: Crowdsec - tcp
+    <<: *security
+    url: "tcp://10.10.10.20:6060"
+  
+  - name: Wazuh - https
+    <<: *security
+    url: "https://wazuh.hughboi-staging.cc"
+
