@@ -1,9 +1,10 @@
 services:
-
   invidious:
     image: quay.io/invidious/invidious:latest
     container_name: invidious
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
       INVIDIOUS_CONFIG: |
         database_url: postgres://kemal:kemal@localhost:5432/invidious
