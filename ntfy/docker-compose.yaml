@@ -1,0 +1,50 @@
+services:
+  ntfy:
+    container_name: ntfy
+    image: binwiederhier/ntfy:v2.11.0
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    command:
+      - serve
+    environment:
+      - TZ=America/Denver
+    volumes:
+      - ntfy-cache:/var/cache/ntfy
+      - /etc/ntfy:/etc/ntfy
+    # healthcheck: # optional: remember to adapt the host:port to your environment
+    #   test: ["CMD-SHELL", "wget -q --tries=1 http://ntfy.hughboi.cc/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
+    #   interval: 60s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ntfy.entrypoints=http"
+      - "traefik.http.routers.ntfy.rule=Host(`ntfy.hughboi.cc`)"
+      - "traefik.http.middlewares.ntfy-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.ntfy.middlewares=ntfy-https-redirect"
+      - "traefik.http.routers.ntfy-secure.entrypoints=https"
+      - "traefik.http.routers.ntfy-secure.rule=Host(`ntfy.hughboi.cc`)"
+      - "traefik.http.routers.ntfy-secure.tls=true"
+      - "traefik.http.services.ntfy.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  ntfy-cache:
+  
