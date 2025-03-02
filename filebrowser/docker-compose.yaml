@@ -3,6 +3,8 @@ services:
     container_name: filebrowser
     image: hurlenko/filebrowser
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     logging:
       driver: loki
       options:
