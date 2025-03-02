@@ -3,7 +3,7 @@ services:
     container_name: speedtest
     image: henrywhitaker3/speedtest-tracker
     volumes:
-      - ./config:/config
+      - speedtest-config:/config
     environment:
       - TZ=America/Denver
       - PGID=1000
@@ -29,3 +29,6 @@ services:
 networks:
   proxy:
     external: true
+
+volumes:
+  speedtest-config:
