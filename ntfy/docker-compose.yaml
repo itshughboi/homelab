@@ -20,7 +20,7 @@ services:
       - TZ=America/Denver
     volumes:
       - ntfy-cache:/var/cache/ntfy
-      - /etc/ntfy:/etc/ntfy
+      - ./config:/etc/ntfy
     # healthcheck: # optional: remember to adapt the host:port to your environment
     #   test: ["CMD-SHELL", "wget -q --tries=1 http://ntfy.hughboi.cc/v1/health -O - | grep -Eo '\"healthy\"\\s*:\\s*true' || exit 1"]
     #   interval: 60s
