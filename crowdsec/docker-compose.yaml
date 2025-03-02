@@ -21,7 +21,7 @@ services:
       - ./config/acquis.yaml:/etc/crowdsec/acquis.yaml
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
-      - /home/hughboi/traefik/logs:/var/log/traefik/:ro
+      - /home/hughboi/traefik/logs:/var/log/traefik/:ro #if i use docker volumes for traefik, I can specify that instead of this bind mount.
     networks:
       - proxy
       - homepage
@@ -49,4 +49,5 @@ networks:
 volumes:
   crowdsec-db:
   crowdsec-config:
-    external: true
+ # traefik_traefik_logs: #only enable if traefik is using docker volume for its logs instead of a bind mount
+ #   external: true
