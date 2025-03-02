@@ -26,17 +26,19 @@ services:
 
   promtail:
     container_name: promtail
-    image: grafana/promtail:latest
-    command: -config.file=/etc/promtail/promtail-config.yml
-    networks:
-      - promgraftail
-    volumes:
-      - /var/log:/var/log
-      - ./promtail:/etc/promtail
+    image: grafana/promtail:3.4.2
+    command: "-config.file=/mnt/config/config.yaml"
     ports:
       - "1541:1514" # this is only needed if you are going to send syslogs
+    environment:
+      - USERNAME=${PROMTAIL_USERNAME}
+      - PASSWORD=${PROMTAIL_PASSWORD}
+    volumes:
+      - ./promtail/promtail.yaml:/mnt/config/config.yaml:ro
+      - /var/log:/var/log:ro
     restart: unless-stopped
-
+    networks:
+      - promgraftail
 
   grafana:
     container_name: grafana
