@@ -1,10 +1,7 @@
 services:
   diun:
-    container_name: diun    
     image: crazymax/diun:4
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    container_name: diun
     logging:
       driver: loki
       options:
@@ -30,13 +27,20 @@ services:
 
       ### Gotify
       - "DIUN_NOTIF_GOTIFY_ENDPOINT=https://gotify.hughboi.cc"
-      - "DIUN_NOTIF_GOTIFY_TOKEN=
+      - "DIUN_NOTIF_GOTIFY_TOKEN="
       - "DIUN_NOTIF_GOTIFY_PRIORITY=1"
       - "DIUN_NOTIF_GOTIFY_TIMEOUT=10s"
 
       ### Discord
-      - "DIUN_NOTIF_DISCORD_WEBHOOKURL=https://discord.com/api/webhooks/"
+      - "DIUN_NOTIF_DISCORD_WEBHOOKURL=https://discord.com/api/webhooks/130058#############/2G0Gpefd30h###########################################"
       # - "DIUN_NOTIF_DISCORD_TEMPLATEBODY"
+
+      ### Ntfy
+      - "DIUN_NOTIF_NTFY_ENDPOINT=https://ntfy.hughboi.cc"
+      - "DIUN_NOTIF_NTFY_TOPIC=diun"
+      - "DIUN_NOTIF_NTFY_TIMEOUT=10s"
+
 
     labels:
       - "diun.enable=true"
+    restart: unless-stopped
