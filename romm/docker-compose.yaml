@@ -1,0 +1,76 @@
+
+services:
+  romm:
+    image: rommapp/romm:3.7.3
+    container_name: romm
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    restart: unless-stopped
+    environment:
+      - DB_HOST=romm-db
+      - DB_NAME=romm # Should match MYSQL_DATABASE in mariadb
+      - DB_USER=romm-user # Should match MYSQL_USER in mariadb
+      - DB_PASSWD= # Should match MYSQL_PASSWORD in mariadb
+      - ROMM_AUTH_SECRET_KEY= # Generate a key with `openssl rand -hex 32`
+      - IGDB_CLIENT_ID= # Generate an ID and SECRET in IGDB
+      - IGDB_CLIENT_SECRET= # https://api-docs.igdb.com/#account-creation
+     # - MOBYGAMES_API_KEY=moby_SMqneNYlsYr4Jze1gTEZQ5SLg41  # https://www.mobygames.com/info/api/ #don't use this anymore. This one I had to pay for
+      - STEAMGRIDDB_API_KEY= # https://github.com/rommapp/romm/wiki/Generate-API-Keys#steamgriddb
+    volumes:
+      - romm_resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
+      - romm_redis_data:/redis-data # Cached data for background tasks
+      - ./library:/romm/library # Your game library
+      - ./assets:/romm/assets # Uploaded saves, states, etc.
+      - ./config/config.yml:/romm/config # Path where config.yml is stored
+    networks:
+      - proxy
+      - romm
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.romm.entrypoints=http"
+      - "traefik.http.routers.romm.rule=Host(`romm.hughboi.cc`)"
+      - "traefik.http.middlewares.romm-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.romm.middlewares=romm-https-redirect"
+      - "traefik.http.routers.romm-secure.entrypoints=https"
+      - "traefik.http.routers.romm-secure.rule=Host(`romm.hughboi.cc`)"
+      - "traefik.http.routers.romm-secure.tls=true"
+      - "traefik.http.routers.romm-secure.service=romm"
+      - "traefik.http.services.romm.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy"
+
+    depends_on:
+      - romm-db
+
+  romm-db:
+    image: mariadb:latest # if you experience issues, try: linuxserver/mariadb:latest
+    container_name: romm-db
+    restart: unless-stopped
+    networks:
+      - romm
+    environment:
+      - MYSQL_ROOT_PASSWORD= # Use a unique, secure password
+      - MYSQL_DATABASE=romm
+      - MYSQL_USER=romm-user
+      - MYSQL_PASSWORD=
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+
+volumes:
+  mysql_data:
+  romm_resources:
+  romm_redis_data:
+
+
+networks:
+  proxy:
+    external: true
+  romm:
+    internal: true
