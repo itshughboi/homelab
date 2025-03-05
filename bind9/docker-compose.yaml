@@ -1,0 +1,16 @@
+services:
+  bind9:
+    image: ubuntu/bind9:9.18-23.10_beta
+    container_name: bind9 
+    user: root
+    volumes:
+      - ./config:/etc/bind:rw
+      - bind9-cache:/var/cache/bind
+    network_mode: "host"
+    environment:
+      - TZ=America/Denver
+      - BIND9_USER=root
+    restart: unless-stopped
+
+volumes:
+  bind9-cache:
