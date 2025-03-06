@@ -1,0 +1,82 @@
+---
+#looking at /etc/ansible/hosts
+- hosts: swarm
+  become: true
+  serial: 1  # Process one server at a time
+  tasks:
+    - name: Update apt repo and cache on all Debian/Ubuntu boxes
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade all packages on servers
+      apt:
+        upgrade: dist
+        force_apt_get: yes
+
+    - name: Check if a reboot is needed on all servers
+      stat:
+        path: /var/run/reboot-required
+        get_checksum: false
+      register: reboot_required_file
+
+#    - name: Notify via Gotify before reboot
+#      uri:
+#        url: "http://gotify.hughboi.cc/message"
+#        method: POST
+#        body_format: json
+#        body:
+#          title: "Reboot Notification"
+#          message: "The server {{ inventory_hostname }} is about to reboot for kernel updates."
+#          priority: 5
+#        headers:
+#          X-Gotify-Key: "{{AHlQOlfWPpapJYw}}"
+#      when: reboot_required_file.stat.exists
+
+    # - name: Notify via ntfy before reboot
+    #   uri:
+    #     url: "https://ntfy.hughboi.cc/reboot"
+    #     method: POST
+    #     body: "The server {{ inventory_hostname }} is about to reboot for kernel updates."
+    #     headers:
+    #       Authorization: "Bearer {{ ntfy_token }}"
+    #   when: reboot_required_file.stat.exists
+
+    - name: Pause for 5 minutes to stagger reboots
+      pause:
+        minutes: 5
+      when: reboot_required_file.stat.exists
+
+    - name: Reboot the box if kernel updated
+      reboot:
+        msg: "Reboot initiated by Ansible for kernel updates"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+      when: reboot_required_file.stat.exists
+
+#    - name: Notify via Gotify after reboot
+#      uri:
+#        url: "http://gotify.hughboi.cc/message"
+#        method: POST
+#        body_format: json
+#        body:
+#          title: "Reboot Completed"
+#          message: "The server {{ inventory_hostname }} has completed its reboot."
+#          priority: 5
+#        headers:
+#          X-Gotify-Key: "{{AHlQOlfWPpapJYw}}"
+#      when: reboot_required_file.stat.exists
+#      tags: notifications
+
+    # - name: Notify via ntfy after reboot
+    #   uri:
+    #     url: "https://ntfy.hughboi.cc/reboot"
+    #     method: POST
+    #     body: "The server {{ inventory_hostname }} has completed its reboot."
+    #     headers:
+    #       Authorization: "Bearer {{ ntfy_token }}"
+    #   when: reboot_required_file.stat.exists
