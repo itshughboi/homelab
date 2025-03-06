@@ -1,0 +1,5 @@
+zone "hughboi.cc" {
+    type master;
+    file "/etc/bind/zones/db.hughboi.cc"; // file name can really be whatever
+    update-policy { grant tsig-key zonesub any; }; // to allow automatic updates to it. Automation w/Terraform
+};
