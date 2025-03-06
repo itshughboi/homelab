@@ -1,0 +1,50 @@
+acl "tailscale" {
+    100.64.0.0/10;  // Covers full Tailnet
+};
+
+acl "home-vlans" {
+    10.10.10.0/24;
+    10.10.20.0/24;
+    10.10.30.0/24;
+    10.10.40.0/24;
+    10.10.50.0/24;
+    10.10.60.0/24;
+    10.10.70.0/24;
+    10.10.80.0/24;
+    10.10.90.0/24;
+    10.100.100.0/24;
+    10.200.200.0/24;
+};
+
+
+options {
+    directory "/etc/bind";
+
+    // Don't forward internal queries and use Bind9
+    forward only;
+
+    forwarders {
+        10.10.10.10; // testing to see if dns are looping     // Adguard   
+        9.9.9.9;    // if Adguard goes down, resort back to public DNS
+    };
+
+	   
+
+    allow-query {
+        10.10.10.0/24;   // Your local network
+        10.150.0.0/16;   // AvidBit
+        10.0.0.0/24;     // Family network   
+        tailscale;
+        home-vlans;
+    };
+
+    recursion yes; 
+    allow-recursion { 10.10.10.0/24; 10.0.0.0/24; home-vlans; tailscale;};
+	
+
+    // Enable DNSSEC validation if needed
+    dnssec-validation auto; // testing if this is breaking something
+
+    listen-on { any; };          // Listen on all available interfaces (IPv4)
+    listen-on-v6 { any; };       // Listen on all available interfaces (IPv6)
+};
