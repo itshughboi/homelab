@@ -1,0 +1,8 @@
+---
+docker:
+  hosts:
+    docker-test:
+      ansible_host: 10.10.10.241
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
