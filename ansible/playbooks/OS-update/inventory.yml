@@ -1,0 +1,73 @@
+kubernetes:
+  hosts:
+    rke-master-1: 
+      ansible_host: 10.10.10.41
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    rke-master-2: 
+      ansible_host: 10.10.10.42
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    rke-master-3: 
+      ansible_host: 10.10.10.43
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    rke-worker-1: 
+      ansible_host: 10.10.10.46
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    rke-worker-2: 
+      ansible_host: 10.10.10.47
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+
+
+docker:
+  hosts:
+    ubnt-prod:
+      ansible_host: 10.10.10.10
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+
+
+swarm:
+  hosts:
+    swarm-master-1:
+      ansible_host: 10.10.10.31
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    swarm-master-2:
+      ansible_host: 10.10.10.32
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    swarm-master-3:
+      ansible_host: 10.10.10.33
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    swarm-worker-1:
+      ansible_host: 10.10.10.36
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo
+    swarm-worker-2:
+      ansible_host: 10.10.10.37
+      ansible_user: 'hughboi'
+      ansible_become: true
+      ansible_become_method: sudo    
+
+# windows:
+#   hosts:
+#     win10test:
+#       ansible_host:
+#       ansible_user:
+#       ansible_pass:
+#       ansible_python_interpreter: /usr/bin/python3
