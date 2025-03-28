@@ -1,7 +1,9 @@
+
 services:
   broker:
+    container_name: paperless-broker  
     image: docker.io/library/redis:7
-    container_name: paperless-broker
+    restart: unless-stopped    
     logging:
       driver: loki
       options:
@@ -11,57 +13,40 @@ services:
         loki-timeout: 1s
         keep-file: "true"
         mode: "non-blocking"
-    restart: unless-stopped
     volumes:
-      - paperless-redisdata:/data
-    networks:
-      paperless:
-
-
-  db:
-    image: docker.io/library/postgres:15
-    container_name: paperless-db
-    restart: unless-stopped
-    volumes:
-      - paperless-pgdata:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: paperless
-      POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: 
+      - redisdata:/data
     networks:
       paperless:
 
 
   webserver:
-    image: ghcr.io/paperless-ngx/paperless-ngx:2.12
     container_name: paperless-webserver
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
     restart: unless-stopped
     depends_on:
-      - db
       - broker
       - gotenberg
       - tika
-    # Not needed as we're using Traefik
-    #ports:
-    #  - "8005:8000"
     volumes:
-      - paperless-data:/usr/src/paperless/data
-      - ./truenas-docs/epoch-1:/usr/src/paperless/data/epoch-1
-      - paperless-media:/usr/src/paperless/media
-      - paperless-export:/usr/src/paperless/export
-      - paperless-consume:/usr/src/paperless/consume
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media # where imported docs live
+      - export:/usr/src/paperless/export
+      - /mnt/truenas/paperless/Backup/Documents/Financial:/usr/src/paperless/consume # this is the only path I need to change
     env_file: .env
     environment:
       PAPERLESS_REDIS: redis://broker:6379
-      PAPERLESS_DBHOST: db
+      PAPERLESS_DBHOST: 10.10.10.7
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: ${PAPERLESS_DBPASS}      
       PAPERLESS_TIKA_ENABLED: 1
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
       PAPERLESS_TIKA_ENDPOINT: http://tika:9998
       PAPERLESS_URL: https://paperless.hughboi.cc
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}
       PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
-      PAPERLESS_UID: 3000
-      PAPERLESS_GID: 3000
+      PAPERLESS_UID: 1000
+      PAPERLESS_GID: 1000
      # PAPERLESS_APPS: "allauth.socialaccount.providers.openid_connect"
       # Find out how to configure Authentik: https://youtu.be/enwFWELCYJo
       #PAPERLESS_SOCIALACCOUNT_PROVIDERS: '{"openid_connect": {"APPS": [{"provider_id": "authentik","name": "Authentik SSO","client_id": "ERmUnfQywogAWWequiMxiKG9OkxTQOq0HfxXwZS9","secret": "CPU79bIhj4Up4GUxsghxioudSvIVLFw988Ocasr2uHyY8aXLoi3jz0fUsGp9jzYOjnQ761MyAfXrDOdaD7d6B6UvFGtvLtNhndXUrBhXeD3KapQk9haXK2P6lJ58RnuH","settings": { "server_url": "https://authentik.hughboi-staging.cc/application/o/paperless-ngx/.well-known/openid-configuration"}}]}}'
@@ -78,17 +63,14 @@ services:
       - "traefik.http.routers.paperless-secure.rule=Host(`paperless.hughboi.cc`)"
       - "traefik.http.routers.paperless-secure.tls=true"
       - "traefik.http.routers.paperless-secure.service=paperless"
-      - "traefik.http.services.paperless.loadbalancer.server.port=8000" # Update to the correct port
+      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
       - "traefik.docker.network=proxy"
 
 
   gotenberg:
-    image: docker.io/gotenberg/gotenberg:7.10
-    container_name: paperless-gotenerg
+    container_name: paperless-gotenerg  
+    image: docker.io/gotenberg/gotenberg:latest
     restart: unless-stopped
-
-    # The gotenberg chromium route is used to convert .eml files. We do not
-    # want to allow external content like tracking pixels or even javascript.
     command:
       - "gotenberg"
       - "--chromium-disable-javascript=true"
@@ -98,17 +80,18 @@ services:
 
 
   tika:
+    container_name: paperless-tika  
     image: ghcr.io/paperless-ngx/tika:latest
-    container_name: paperless-tika
     restart: unless-stopped
     networks:
       paperless:
 
+
 volumes:
-  paperless-data:
-  paperless-media:
-  paperless-pgdata:
-  paperless-redisdata:
+  data:
+  redisdata:
+  export:
+  media:
 
 networks:
   paperless:
