@@ -55,7 +55,7 @@ endpoint-security: &security
 endpoints:
 
 ### Servers
-  - name: pve-srv-1 - tcp
+  - name: Hades - tcp
     <<: *server
     url: "tcp://10.10.10.1:8006"
   
@@ -97,9 +97,6 @@ endpoints:
     interval: 30s
     conditions:
       - "[CONNECTED] == true"
-    alerts:
-      - type: discord
-      - type: ntfy
 
 ### Applications
   - name: Adguard - https
@@ -109,10 +106,6 @@ endpoints:
   - name: Authentik - https
     <<: *applications
     url: "https://authentik.hughboi.cc"
-
-  - name: Duplicati - https
-    <<: *applications
-    url: "https://duplicati.hughboi.cc"
   
   - name: Grafana - https
     <<: *applications
@@ -134,10 +127,6 @@ endpoints:
   #   <<: *applications
   #   url: "tcp://loki:3100/loki/api/v1/push" # :9096
 
-
-  - name: Netdata Homepage - https
-    <<: *applications
-    url: "https://netdata.hughboi.cc"
 
   - name: Ntfy - https
     <<: *applications
@@ -167,9 +156,9 @@ endpoints:
     <<: *applications
     url: "https://vaultwarden.hughboi.cc"
 
-  - name: Whoogle - https
+  - name: Searxng - https
     <<: *applications
-    url: "https://whoogle.hughboi.cc"
+    url: "https://search.hughboi.cc"
 
 
 
@@ -181,4 +170,3 @@ endpoints:
   - name: Wazuh - https
     <<: *security
     url: "https://wazuh.hughboi.cc"
-
