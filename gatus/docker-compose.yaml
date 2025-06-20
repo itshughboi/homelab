@@ -1,10 +1,7 @@
 services:
   gatus:
+    image: twinproduction/gatus:latest
     container_name: gatus
-    image: twinproduction/gatus:v5.12.1
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
     logging:
       driver: loki
       options:
@@ -15,14 +12,15 @@ services:
         keep-file: "true"
         mode: "non-blocking"
     dns:
-      - "10.10.10.9"
+      - "10.10.10.9"  # specify bind9 so it can resolve hostnames.
       - "10.10.10.10"
+    restart: unless-stopped
+    ports:
+      - "8074:8080"
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - ./config:/config
+      - POSTGRES_USER=${POSTGRES_USER} # postgres user with access to the database
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD} # postgres user password
+      - POSTGRES_DB=${POSTGRES_DB} # this should be the name of your postgres database
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.gatus.entrypoints=http"
@@ -34,6 +32,8 @@ services:
       - "traefik.http.routers.gatus-secure.tls=true"
       - "traefik.http.services.gatus.loadbalancer.server.port=8080"
       - "traefik.docker.network=proxy"
+    volumes:
+      - ./config:/config
     networks:
       - proxy
 
