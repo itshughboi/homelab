@@ -1,6 +1,6 @@
 services:
   adguardhome:
-    container_name: adguardhome
+    container_name: adguard
     image: adguard/adguardhome:latest
     restart: unless-stopped
     security_opt:
@@ -14,20 +14,12 @@ services:
         loki-timeout: 1s
         keep-file: "true"
         mode: non-blocking
-    ports:
-      - 53:53/tcp
-      - 53:53/udp
-      # - 853:853/tcp # DNS over TLS - Unbound can do this
-      # - 784:784/udp
-      # - 3000:3000/tcp # Setup webui
-      # - 80:80/tcp # Web port
-      # - 449:443/tcp # Web port secure
-    environment:
-      TZ: America/Denver
-      ADGUARD_DNS_: 192.168.100.10#5335 # specify the IP of the docker container on the unbound network. Specified below under ipv4_address
     volumes:
       - ./adguard-data/work:/opt/adguardhome/work
       - ./adguard-data/conf:/opt/adguardhome/conf
+    environment:
+      TZ: America/Denver
+      ADGUARD_DNS_: 192.168.100.10#5335 # specify the IP of the docker container on the unbound network. Specified below under ipv4_address
     labels:
       - traefik.enable=true
       - traefik.http.routers.adguard.entrypoints=http
@@ -40,10 +32,21 @@ services:
       - traefik.http.routers.adguard-secure.service=adguard
       - traefik.http.services.adguard.loadbalancer.server.port=80
       - traefik.docker.network=proxy
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      # - 853:853/tcp # DNS over TLS - Unbound can do this
+      # - 784:784/udp
+      # - 3000:3000/tcp # Setup webui
+      # - 80:80/tcp # Web port
+      # - 449:443/tcp # Web port secure
     networks:
       unbound:
         ipv4_address: 192.168.100.9
       proxy: null
+
+
+
 
   unbound:
     container_name: unbound
@@ -62,9 +65,6 @@ services:
         mode: non-blocking
     volumes:
       - ./unbound/:/opt/unbound/etc/unbound
-    ports:
-      - 5335:53/tcp
-      - 5335:53/udp
     healthcheck:
       test:
         - CMD
@@ -76,9 +76,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    ports:
+      - 5335:53/tcp
+      - 5335:53/udp
     networks:
       unbound:
         ipv4_address: 192.168.100.10
+
+  
 
         
 networks:
