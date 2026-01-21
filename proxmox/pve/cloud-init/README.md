@@ -1,5 +1,4 @@
-
-## Cloud Init
+## Setup
 Go to Ubuntu Cloud Images Releases. Find the LTS I want. Navigate into the 'current' directory. Find the amd.img and right click and hit 'copy link address' and then on local storage in Proxmox query that URL.
 https://cloud-images.ubuntu.com/
 
