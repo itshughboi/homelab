@@ -1,5 +1,5 @@
-### NIC's
-**pve-srv-1**
+## NIC's
+#### **pve-srv-1** <br>
 Intel 82575EB Gigabit Network Connection - 1C:86:0B:20:06:B8 <br>
 Intel 82575EB Gigabit Network Connection - 1C:86:0B:20:06:B9 <br>
 
@@ -11,7 +11,7 @@ Intel Ethernet I350-T4 - 98:B7:85:1E:A0:25 - leftmost of the four <br>
 
 
 
-### Cluster Setup
+## Cluster Setup
 1. Manually boot first proxmox node from Ventoy. Enable SSH, and get to where the Web UI is accessible at https://IP:8006
 2. Bootstrap a template Ubuntu machine via **cloud-init**.
    - Add SSH key
