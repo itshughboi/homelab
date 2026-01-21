@@ -21,6 +21,7 @@
 | Testing  | 200 | 10.200.200.0/24 |                                |
 | Ad-Block | 111 | 10.10.111.0/24  | IoT and guests for Adblock DNS |
 | torrent  | 49  | 172.16.20.0/24  | torrent + mullvad              |
+***
 **Notes:** Ports that connect to Proxmox nodes, trunked devices, or managed switches (Unifi) should all be set to **trunk** or **allow all VLANs**. Configure VLANs on both Proxmox hosts under the virtual NIC (assign the VLAN to a bridge interface which binds to a specific port) and then that bridge will carry the VLAN for that VM.
 
 
