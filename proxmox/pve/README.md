@@ -1,3 +1,6 @@
+## Notification Endpoint
+email: alerts@hughboi.cc
+
 
 ## Updates
 Datacenter -> Updates -> Refresh to update and then click Upgrade to upgrade. Must be root for this.
