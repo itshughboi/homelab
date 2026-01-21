@@ -1,3 +1,24 @@
+
+## Updates
+Datacenter -> Updates -> Refresh to update and then click Upgrade to upgrade. Must be root for this.
+Can also login to shell and run apt update && apt dist-upgrade
+Reboot if there is a kernel update
+
+
+
+## VM Creation Default Values
+**Machine Type**: Typically I can do i440fx, but if I need to do any hardware passthrough, a **q35** machine will be needed/recommended (IOMMU)
+**Disks**: 
+- SSD emulation (checked). Enables TRIM. Once something is marked for deletion, it can go back and reclaim that space
+
+**CPU**:
+- Type: Host. This grants it the full features of the CPU in this emulated setup
+
+**Memory**:
+- Ballooning Device: Unchecked. This will carve out a portion of your total RAM to this machine. If ballooning is on, it will dynamically allocate more RAM up to the theorteical max, but the reserve it takes from is shared through the host. Can run into issues if too many things have ballooning on and RAM gets overallocated.
+
+
+
 ## NIC's
 #### **pve-srv-1** <br>
 Intel 82575EB Gigabit Network Connection - 1C:86:0B:20:06:B8 <br>
