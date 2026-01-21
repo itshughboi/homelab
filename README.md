@@ -23,6 +23,19 @@
 | torrent  | 49  | 172.16.20.0/24  | torrent + mullvad              |
 ***
 **Notes:** Ports that connect to Proxmox nodes, trunked devices, or managed switches (Unifi) should all be set to **trunk** or **allow all VLANs**. Configure VLANs on both Proxmox hosts under the virtual NIC (assign the VLAN to a bridge interface which binds to a specific port) and then that bridge will carry the VLAN for that VM.
+***
+
+
+### Essentials
+| Name        | VLAN | IP           | Gateway      |
+| ----------- | ---- | ------------ | ------------ |
+| truenas     | 1    | 10.10.10.5   | 10.10.10.254 |
+| pbs         | 1    | 10.10.10.6   | 10.10.10.254 |
+| postgres-ha | 1    | 10.10.10.7   | 10.10.10.254 |
+| ansible     | 1    | 10.10.10.8   | 10.10.10.254 |
+| bind9       | 1    | 10.10.10.9   | 10.10.10.254 |
+| ubnt-prod   | 1    | 10.10.10.10  | 10.10.10.254 |
+| vpn-gateway | 8    | 10.10.80.254 | 10.10.80.254 |
 
 
 ### k3s
