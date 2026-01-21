@@ -14,7 +14,7 @@
 
 | VLAN     | ID  | Network         | Notes                          |
 | -------- | --- | --------------- | ------------------------------ |
-| Home     | 1   | 10.10.10.0/24   | Proxmox +Unifi, Bind9, Storage |
+| Home     | 1   | 10.10.10.0/24   | Proxmox, Unifi, Bind9, Truenas |
 | Swarm    | 2   | 10.10.20.0/24   | Swarm                          |
 | k3s      | 3   | 10.10.30.0/24   | Masters + Workers, Longhorn    |
 | VPN      | 8   | 10.10.80.0/24   | VPN                            |
