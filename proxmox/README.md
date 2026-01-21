@@ -80,3 +80,56 @@ qm set 5003 --serial0 socket --vga serial0
 ##### VM Clone
 - Right click on template and hit **Full Clone**
 
+
+***
+
+### Cloud Init SSH
+1. Make sure my public key is put into cloud-init of machine
+2. Console into machine and edit ssh file
+```
+sudo nano /etc/ssh/sshd_config
+```
+3. Uncomment PubkeyAuthentication yes
+4. Uncomment AuthorizedKeyFile
+5. Restart service
+```
+sudo systemctl restart ssh
+```
+
+##### Permissions
+```
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+chown -R hughboi:hughboi ~/.ssh
+```
+
+
+### Specifying ssh private key
+```
+ssh -i ~/.ssh/ansible hughboi@10.10.30.1
+```
+
+
+##### Debugging
+```
+ssh -vvv -i ~/.ssh/ansible hughboi@10.10.30.1
+```
+
+
+***
+
+##### Create new SSH keypair
+```
+ssh-keygen -t ed25519
+```
+^^ this crypto algorithm is becoming the new standard
+
+##### Copy over public key
+```
+ssh-copy-id hughboi@SERVERIP/HOSTNAME
+```
+
+
+### Pubkey Authentication (Including Raspberry Pi Imager)
+- If i keep seeing this after editing /etc/ssh/sshd_config, there's probably an override somewhere. Common things I've seen is Cloud Init overriding it under **/etc/ssh/sshd_config.d/50-cloud-init.conf** and password authentication might be turned off there
+
