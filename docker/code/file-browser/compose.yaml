@@ -14,7 +14,7 @@ services:
         mode: "non-blocking"
     user: "1000:1000"
     volumes:
-      - ./home/hughboi/code/file-browser/data:/data #directory to browse :/data by default, but if using other directories, use /data/directory. /data/ would be a 1-1 mapping
+      - ./home/hughboi/data/file-browser/data:/data #directory to browse :/data by default, but if using other directories, use /data/directory. /data/ would be a 1-1 mapping
       - db:/config #where filebrowser.db resides
     environment:
       - FB_BASEURL=/filebrowser
