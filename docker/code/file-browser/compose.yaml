@@ -1,0 +1,42 @@
+services:
+  filebrowser:
+    container_name: filebrowser
+    image: hurlenko/filebrowser
+    restart: unless-stopped
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    user: "1000:1000"
+    volumes:
+      - ./home/hughboi/code/file-browser/data:/data #directory to browse :/data by default, but if using other directories, use /data/directory. /data/ would be a 1-1 mapping
+      - db:/config #where filebrowser.db resides
+    environment:
+      - FB_BASEURL=/filebrowser
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.file.entrypoints=http"
+      - "traefik.http.routers.file.rule=Host(`file.hughboi.cc`)"
+      - "traefik.http.middlewares.file-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.file.middlewares=file-https-redirect"
+      - "traefik.http.routers.file-secure.entrypoints=https"
+      - "traefik.http.routers.file-secure.rule=Host(`file.hughboi.cc`)"
+      - "traefik.http.routers.file-secure.tls=true"
+      - "traefik.http.services.file.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+
+volumes:
+  db:
+
+networks:
+  proxy:
+    external: true
+
