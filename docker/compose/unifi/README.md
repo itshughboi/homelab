@@ -1,0 +1,1 @@
+Good security measure will be to put firewall restrictions to my dns server to specific subnets. Super low risk in my environment, but good to be in practice of restricting internal dns servers to authorized subnets

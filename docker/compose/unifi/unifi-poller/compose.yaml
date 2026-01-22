@@ -1,0 +1,40 @@
+services:
+  unifi-poller:
+    container_name: unfii-poller
+    restart: always
+    image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    environment:
+      - UP_INFLUXDB_DISABLE=true    # using prometheus instead of influx
+      - UP_POLLER_DEBUG=true        # greater log output
+      - UP_UNIFI_DYNAMIC=false
+
+      - UP_PROMETHEUS_HTTP_LISTEN=0.0.0.0:9130    # Published endpoint for Promeheus to scrape
+      - UP_PROMETHEUS_NAMESPACE=unpoller          # DONT CHANGE THIS NAMESPACE. DASHBOARD QUEREIES WILL UTILIZE THIS SPECIFIC NAMESPACE. If not using, no data will visualize
+
+      - UP_UNIFI_CONTROLLER_0_URL=${UNIFI_URL}
+      - UP_UNIFI_DEFAULT_USER=${UNIFI_USER}
+      - UP_UNIFI_DEFAULT_PASS=${UNIFI_PASS}
+      - UP_UNIFI_CONTROLLER_0_PASS=${UNIFI_PASS}
+      - UP_UNIFI_CONTROLLER_0_SAVE_ALARMS=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_DPI=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_EVENTS=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_IDS=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_SITES=true
+      - UP_UNIFI_CONTROLLER_0_USER=unifi-poller
+    ports:
+      - 9130:9130/tcp
+    networks:
+      - promgraftail
+
+networks:
+  promgraftail:
