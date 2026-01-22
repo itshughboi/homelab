@@ -47,7 +47,7 @@ Hamburger Menu -> Server Management -> Settings -> Edit Configuration (Top right
 
  2. Save + Restart Manager
  3. On the ubuntu host, go to the integrations mapped folder in the cli and do the following while under **sudo su**
-      1. Grab the integration files
+      1. Grab the integration files <br>
         ```
         wget https://raw.githubusercontent.com/maikroservice/wazuh-integrations/main/discord/custom-discord
         wget https://raw.githubusercontent.com/maikroservice/wazuh-integrations/main/discord/custom-discord.py
@@ -58,7 +58,7 @@ Hamburger Menu -> Server Management -> Settings -> Edit Configuration (Top right
         sudo chmod 750 ./wazuh_integrations/custom-*
         sudo chown root:wazuh ./wazuh_integrations/custom-*
         ```
-      3. Then get the python extension
+      3. Then get the python extension <br>
         ```
         sudo apt-get install python3-pip
         pip3 install requests
