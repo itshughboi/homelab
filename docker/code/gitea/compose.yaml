@@ -13,7 +13,7 @@ services:
         keep-file: "true"
         mode: "non-blocking"
     volumes:
-      - gitea-data:/data
+      - /home/hughboi/data/gitea:/data
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
@@ -55,9 +55,6 @@ services:
       GITEA_RUNNER_NAME: "Hermes"
       GITEA_RUNNER_LABELS: "${RUNNER_LABELS}"
 
-
-volumes:
-  gitea-data:
 
 networks:
   proxy:
