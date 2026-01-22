@@ -1,0 +1,60 @@
+services:
+  backup:
+    container_name: restic    
+    image: mazzolino/restic
+    hostname: ubnt-prod
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true    
+    volumes:
+      - /mnt/truenas/restic:/restic #TrueNAS Restic NFS mounted here
+      - /mnt/truenas/restic/tmp-for-restore:/tmp-for-restore #USE THIS FOLDER FOR RESTORE - CAN VIEW EACH CONTAINER
+      - /home/hughboi:/mnt/volumes:ro #specify what I want restic to backup. e.g. backup /home/hughboi
+    environment:
+      PUID: "3000"  # User ID for hughboi on TrueNAS
+      PGID: "3000"  # Group ID for hughboi. Maybe change this to 3002 for restic user
+      RUN_ON_STARTUP: "true" #change to true if i want a backup when a container starts
+      BACKUP_CRON: "0 */12 * * *" #this is twice daily, i.e., every 12 hours (incremental)
+      RESTIC_REPOSITORY: /restic
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      RESTIC_BACKUP_SOURCES: /mnt/volumes
+      RESTIC_COMPRESSION: auto 
+      RESTIC_BACKUP_ARGS: >-
+        --tag restic-proxmox          #add tags, whatever you need to mark backups
+        --verbose
+      RESTIC_FORGET_ARGS: >- #change as required
+        --keep-last 20
+        --keep-weekly 1
+        --keep-monthly 2
+      #  --keep-daily 7
+      TZ: ${TZ}
+   
+
+  prune:
+    image: mazzolino/restic
+    container_name: restic-prune
+    hostname: ubnt-prod
+    security_opt:
+      - no-new-privileges:true    
+    environment:
+      RUN_ON_STARTUP: "true"
+      PRUNE_CRON: "0 0 4 * * *"
+      RESTIC_REPOSITORY: /restic
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      TZ: ${TZ}
+
+
+  check:
+    image: mazzolino/restic
+    container_name: restic-check
+    hostname: ubnt-prod
+    security_opt:
+      - no-new-privileges:true    
+    environment:
+      RUN_ON_STARTUP: "false"
+      CHECK_CRON: "0 15 5 * * *"
+      RESTIC_CHECK_ARGS: >-
+        --read-data-subset=10%
+      RESTIC_REPOSITORY: /restic
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      TZ: ${TZ}
