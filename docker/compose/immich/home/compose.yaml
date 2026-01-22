@@ -20,7 +20,7 @@ services:
         mode: "non-blocking"
     volumes:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
-      - upload:/usr/src/app/upload
+      - upload:/usr/src/app/upload  # may want to change to a bind mount. This is like if you uploaded from your phone to Immich where the files would be stored
       - /etc/localtime:/etc/localtime:ro
       - /mnt/truenas/immich:/mnt/media/truenas:ro
     env_file:
