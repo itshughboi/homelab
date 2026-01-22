@@ -14,6 +14,7 @@ services:
         mode: "non-blocking"
     volumes:
       - /home/hughboi/data/fasten-health/db:/opt/fasten/db
+      - /home/hughboi/fastenhealth/config.yaml:/opt/fasten/config/config.yaml
       - cache:/opt/fasten/cache
     labels:
       - "traefik.enable=true"

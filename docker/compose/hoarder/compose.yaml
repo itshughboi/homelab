@@ -1,0 +1,70 @@
+services:
+  web:
+    container_name: hoarder
+    image: ghcr.io/hoarder-app/hoarder:latest
+    restart: unless-stopped
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    volumes:
+      - data:/data
+    environment:
+      MEILI_ADDR: http://meilisearch:7700
+      BROWSER_WEB_URL: http://chrome:9222
+      DATA_DIR: /data
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hoarder.entrypoints=http"
+      - "traefik.http.routers.hoarder.rule=Host(`hoarder.hughboi.cc`)"
+      - "traefik.http.middlewares.hoarder-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.hoarder.middlewares=hoarder-https-redirect"
+      - "traefik.http.routers.hoarder-secure.entrypoints=https"
+      - "traefik.http.routers.hoarder-secure.rule=Host(`hoarder.hughboi.cc`)"
+      - "traefik.http.routers.hoarder-secure.tls=true"
+      - "traefik.http.services.hoarder.loadbalancer.server.port=3000"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+  chrome:
+    container_name: hoarder-chrome
+    image: gcr.io/zenika-hub/alpine-chrome:latest
+    restart: unless-stopped
+    command:
+      - --no-sandbox
+      - --disable-gpu
+      - --disable-dev-shm-usage
+      - --remote-debugging-address=0.0.0.0
+      - --remote-debugging-port=9222
+      - --hide-scrollbars
+    networks:
+      - proxy
+
+  meilisearch:
+    container_name: hoarder-search
+    image: getmeili/meilisearch:v1.15.2 #need to upgrade if I want to use latest
+    restart: unless-stopped
+    volumes:
+      - meilisearch:/meili_data
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+    env_file:
+      - .env
+    networks:
+      - proxy
+
+volumes:
+  meilisearch:
+  data:
+
+networks:
+  proxy:
+    external: true
