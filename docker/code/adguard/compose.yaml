@@ -1,0 +1,80 @@
+services:
+  adguardhome:
+    container_name: adguard
+    image: adguard/adguardhome:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: loki
+      options:
+        loki-url: https://loki.hughboi.cc/loki/api/v1/push
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: non-blocking
+    volumes:
+      - work:/opt/adguardhome/work
+      - conf:/opt/adguardhome/conf
+    environment:
+      TZ: America/Denver
+      ADGUARD_DNS_: 192.168.100.10#5335 # specify the IP of the docker container on the unbound network. Specified below under ipv4_address
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.adguard.entrypoints=http
+      - traefik.http.routers.adguard.rule=Host(`adguard.hughboi.cc`)
+      - traefik.http.middlewares.adguard-https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.adguard.middlewares=adguard-https-redirect
+      - traefik.http.routers.adguard-secure.entrypoints=https
+      - traefik.http.routers.adguard-secure.rule=Host(`adguard.hughboi.cc`)
+      - traefik.http.routers.adguard-secure.tls=true
+      - traefik.http.routers.adguard-secure.service=adguard
+      - traefik.http.services.adguard.loadbalancer.server.port=80
+      - traefik.docker.network=proxy
+      - diun.enable=true
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      # - 853:853/tcp # DNS over TLS - Unbound would handle this if using (i use root.hints instead)
+      # - 784:784/udp # unbound remote control interface
+      # - 3000:3000/tcp # Setup UI port for first spin up
+    networks:
+      unbound:
+        ipv4_address: 192.168.100.9
+      proxy: null
+
+
+
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:1.22.0
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /home/hughboi/data/adguard/unbound/:/opt/unbound/etc/unbound
+    ports:
+      - 5335:53/tcp
+      - 5335:53/udp
+    healthcheck:
+      test: ["NONE"]
+    networks:
+      unbound:
+        ipv4_address: 192.168.100.10
+
+
+volumes:
+  work:
+  conf:
+
+
+  
+networks:
+  unbound:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/27
+  proxy:
+    external: true
