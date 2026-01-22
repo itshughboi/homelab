@@ -46,7 +46,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./config.yaml:/config.yaml
-      - ./data:/data
+      - ./home/hughboi/data/gitea/runner:/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       CONFIG_FILE: /config.yaml
