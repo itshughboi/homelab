@@ -49,7 +49,7 @@ Hamburger Menu -> Server Management -> Settings -> Edit Configuration (Top right
  3. On the ubuntu host, go to the integrations mapped folder in the cli and do the following while under **sudo su**
       1. Grab the integration files <br>
         ```
-        wget https://raw.githubusercontent.com/maikroservice/wazuh-integrations/main/discord/custom-discord
+        wget https://raw.githubusercontent.com/maikroservice/wazuh-integrations/main/discord/custom-discord <br>
         wget https://raw.githubusercontent.com/maikroservice/wazuh-integrations/main/discord/custom-discord.py
         ```
 
