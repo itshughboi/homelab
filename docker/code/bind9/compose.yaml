@@ -1,0 +1,20 @@
+services:
+  bind9:
+    image: ubuntu/bind9:9.18-23.10_beta
+    container_name: bind9 
+    # PUID: 1000
+    # PUIG: 1000
+    # user: "1000"
+    # UID: 1000
+    user: root
+    volumes:
+      - /home/hughboi/code/bind9/config:/etc/bind:rw
+      - cache:/var/cache/bind
+    network_mode: "host"
+    environment:
+      - TZ=America/Denver
+      - BIND9_USER=root
+    restart: unless-stopped
+
+volumes:
+  cache:
