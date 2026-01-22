@@ -3,100 +3,9 @@
 # Please refer to the documentation at https://ntfy.sh/docs/config/ for details.
 # All options also support underscores (_) instead of dashes (-) to comply with the YAML spec.
 
-# Public facing base URL of the service (e.g. https://ntfy.sh or https://ntfy.example.com)
-#
-# This setting is required for any of the following features:
-# - attachments (to return a download URL)
-# - e-mail sending (for the topic URL in the email footer)
-# - iOS push notifications for self-hosted servers (to calculate the Firebase poll_request topic)
-# - Matrix Push Gateway (to validate that the pushkey is correct)
 #
 base-url: "https://ntfy.hughboi.cc"
 
-# Listen address for the HTTP & HTTPS web server. If "listen-https" is set, you must also
-# set "key-file" and "cert-file". Format: [<ip>]:<port>, e.g. "1.2.3.4:8080".
-#
-# To listen on all interfaces, you may omit the IP address, e.g. ":443".
-# To disable HTTP, set "listen-http" to "-".
-#
-# listen-http: ":80"
-# listen-https:
-
-# Listen on a Unix socket, e.g. /var/lib/ntfy/ntfy.sock
-# This can be useful to avoid port issues on local systems, and to simplify permissions.
-#
-# listen-unix: <socket-path>
-# listen-unix-mode: <linux permissions, e.g. 0700>
-
-# Path to the private key & cert file for the HTTPS web server. Not used if "listen-https" is not set.
-#
-# key-file: <filename>
-# cert-file: <filename>
-
-# If set, also publish messages to a Firebase Cloud Messaging (FCM) topic for your app.
-# This is optional and only required to save battery when using the Android app.
-#
-# firebase-key-file: <filename>
-
-# If "cache-file" is set, messages are cached in a local SQLite database instead of only in-memory.
-# This allows for service restarts without losing messages in support of the since= parameter.
-#
-# The "cache-duration" parameter defines the duration for which messages will be buffered
-# before they are deleted. This is required to support the "since=..." and "poll=1" parameter.
-# To disable the cache entirely (on-disk/in-memory), set "cache-duration" to 0.
-# The cache file is created automatically, provided that the correct permissions are set.
-#
-# The "cache-startup-queries" parameter allows you to run commands when the database is initialized,
-# e.g. to enable WAL mode (see https://phiresky.github.io/blog/2020/sqlite-performance-tuning/)).
-# Example:
-#    cache-startup-queries: |
-#       pragma journal_mode = WAL;
-#       pragma synchronous = normal;
-#       pragma temp_store = memory;
-#       pragma busy_timeout = 15000;
-#       vacuum;
-#
-# The "cache-batch-size" and "cache-batch-timeout" parameter allow enabling async batch writing
-# of messages. If set, messages will be queued and written to the database in batches of the given
-# size, or after the given timeout. This is only required for high volume servers.
-#
-# Debian/RPM package users:
-#   Use /var/cache/ntfy/cache.db as cache file to avoid permission issues. The package
-#   creates this folder for you.
-#
-# Check your permissions:
-#   If you are running ntfy with systemd, make sure this cache file is owned by the
-#   ntfy user and group by running: chown ntfy.ntfy <filename>.
-#
-# cache-file: <filename>
-# cache-duration: "12h"
-# cache-startup-queries:
-# cache-batch-size: 0
-# cache-batch-timeout: "0ms"
-
-# If set, access to the ntfy server and API can be controlled on a granular level using
-# the 'ntfy user' and 'ntfy access' commands. See the --help pages for details, or check the docs.
-#
-# - auth-file is the SQLite user/access database; it is created automatically if it doesn't already exist
-# - auth-default-access defines the default/fallback access if no access control entry is found; it can be
-#   set to "read-write" (default), "read-only", "write-only" or "deny-all".
-# - auth-startup-queries allows you to run commands when the database is initialized, e.g. to enable
-#   WAL mode. This is similar to cache-startup-queries. See above for details.
-#
-# Debian/RPM package users:
-#   Use /var/lib/ntfy/user.db as user database to avoid permission issues. The package
-#   creates this folder for you.
-#
-# Check your permissions:
-#   If you are running ntfy with systemd, make sure this user database file is owned by the
-#   ntfy user and group by running: chown ntfy.ntfy <filename>.
-#
-# auth-file: <filename>
-# auth-default-access: "read-write"
-# auth-startup-queries:
-
-# If set, the X-Forwarded-For header is used to determine the visitor IP address
-# instead of the remote address of the connection.
 #
 # WARNING: If you are behind a proxy, you must set this, otherwise all visitors are rate limited
 #          as if they are one.
@@ -116,20 +25,6 @@ behind-proxy: true
 # attachment-file-size-limit: "15M"
 # attachment-expiry-duration: "3h"
 
-# If enabled, allow outgoing e-mail notifications via the 'X-Email' header. If this header is set,
-# messages will additionally be sent out as e-mail using an external SMTP server.
-#
-# As of today, only SMTP servers with plain text auth (or no auth at all), and STARTLS are supported.
-# Please also refer to the rate limiting settings below (visitor-email-limit-burst & visitor-email-limit-burst).
-#
-# - smtp-sender-addr is the hostname:port of the SMTP server
-# - smtp-sender-from is the e-mail address of the sender
-# - smtp-sender-user/smtp-sender-pass are the username and password of the SMTP user (leave blank for no auth)
-#
-# smtp-sender-addr:
-# smtp-sender-from:
-# smtp-sender-user:
-# smtp-sender-pass:
 
 # If enabled, ntfy will launch a lightweight SMTP server for incoming messages. Once configured, users can send
 # emails to a topic e-mail address to publish messages to a topic.
@@ -153,8 +48,8 @@ behind-proxy: true
 # You must configure web-push-public/private key, web-push-file, and web-push-email-address below to enable Web Push.
 # Run "ntfy webpush keys" to generate the keys.
 #
-# - web-push-public-key is the generated VAPID public key, e.g. AA1234BBCCddvveekaabcdfqwertyuiopasdfghjklzxcvbnm1234567890
-# - web-push-private-key is the generated VAPID private key, e.g. AA2BB1234567890abcdefzxcvbnm1234567890
+# - web-push-public-key is the generated VAPID public key
+# - web-push-private-key is the generated VAPID private key
 # - web-push-file is a database file to keep track of browser subscription endpoints, e.g. `/var/cache/ntfy/webpush.db`
 # - web-push-email-address is the admin email address send to the push provider, e.g. `sysadmin@example.com`
 # - web-push-startup-queries is an optional list of queries to run on startup`
