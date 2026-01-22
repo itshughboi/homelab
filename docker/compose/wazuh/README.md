@@ -1,6 +1,6 @@
 # Deploy Wazuh Docker in single node configuration
 
-This deployment is defined in the `docker-compose.yml` file with one Wazuh manager containers, one Wazuh indexer containers, and one Wazuh dashboard container. It can be deployed by following these steps: 
+This deployment is defined in the `compose.yaml` file with one Wazuh manager containers, one Wazuh indexer containers, and one Wazuh dashboard container. It can be deployed by following these steps: 
 
 1) Increase max_map_count on your host (Linux). This command must be run with root permissions:
 ```
@@ -24,11 +24,14 @@ $ docker-compose up -d
 The environment takes about 1 minute to get up (depending on your Docker host) for the first time since Wazuh Indexer must be started for the first time and the indexes and index patterns must be generated.
 
 ### Traefik issues
-- it took me a long time to find how to put this behind traefik. Everything was configured, but I could only access it via ip, not the dns name. Fixed by commenting the following in this file: ./config/wazuh_dashboard/opensearch_dashboards.yml
+- it took me a long time to find how to put this behind traefik. Everything was configured, but I could only access it via ip, not the dns name. Fixed by commenting the following in this file:
+<br>
+ */home/hughboi/data/wazuh/config/wazuh_dashboard/opensearch_dashboards.yml*
+ ```
     #server.ssl.enabled: true
     #server.ssl.key: "/usr/share/wazuh-dashboard/certs/wazuh-dashboard-key.pem"
     #server.ssl.certificate: "/usr/share/wazuh-dashboard/certs/wazuh-dashboard.pem"
-
+```
 
 
 ### Discord Notifications
@@ -60,6 +63,7 @@ Hamburger Menu -> Server Management -> Settings -> Edit Configuration (Top right
         sudo apt-get install python3-pip
         pip3 install requests
         ```
-      4.  Restart Wazuh's controls
-          1.  sudo docker compose up -d --force-recreate
-
+  4.  Restart Wazuh's controls
+  ```
+  sudo docker compose up -d --force-recreate
+  ```
