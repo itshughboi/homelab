@@ -1,0 +1,110 @@
+services:
+  tubearchivist:
+    container_name: tube-archivist
+    restart: unless-stopped
+    image: bbilly1/tubearchivist
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    volumes:
+      - /mnt/truenas/yt-audios:/youtube
+      - cache:/cache
+    environment:
+      - ES_URL=http://archivist-es:9200   
+      - REDIS_CON=redis://archivist-redis:6379
+      - HOST_UID=1000
+      - HOST_GID=1000
+      - TA_HOST=https://yt.hughboi.cc
+      - TA_USERNAME=${TA_USERNAME}          
+      - TA_PASSWORD=${TA_PASSWORD}        
+      - ELASTIC_PASSWORD=${ES_PASSWORD}  
+      - TZ=America/Denver 
+    depends_on:
+      - archivist-es
+      - archivist-redis
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.yt.entrypoints=http
+      - traefik.http.routers.yt.rule=Host(`yt.hughboi.cc`)
+      - traefik.http.middlewares.yt-https-redirect.redirectscheme.scheme=https
+      - traefik.http.routers.yt.middlewares=yt-https-redirect
+      - traefik.http.routers.yt-secure.entrypoints=https
+      - traefik.http.routers.yt-secure.rule=Host(`yt.hughboi.cc`)
+      - traefik.http.routers.yt-secure.tls=true
+      - traefik.http.routers.yt-secure.service=yt
+      - traefik.http.services.yt.loadbalancer.server.port=8000
+      - traefik.docker.network=proxy
+    networks:
+      - proxy
+      - archivist
+
+
+  archivist-redis:
+    image: redis
+    container_name: archivist-redis
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    restart: unless-stopped
+    expose:
+      - "6379"
+    volumes:
+      - redis:/data
+    depends_on:
+      - archivist-es
+    networks:
+      - archivist
+
+
+  archivist-es:
+    image: bbilly1/tubearchivist-es       
+    container_name: archivist-es
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    restart: unless-stopped
+    environment:
+      - "ELASTIC_PASSWORD=${ES_PASSWORD}"     
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "xpack.security.enabled=true"
+      - "discovery.type=single-node"
+      - "path.repo=/usr/share/elasticsearch/data/snapshot"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es:/usr/share/elasticsearch/data    # check for permission error when using bind mount, see readme
+    expose:
+      - "9200"
+    networks:
+      - archivist
+
+volumes:
+
+  cache:
+  redis:
+  es:
+
+networks:
+  proxy:
+    external: true
+  archivist:

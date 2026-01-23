@@ -1,0 +1,1 @@
+Make sure to give acme.json 600 permissions

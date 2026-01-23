@@ -1,0 +1,86 @@
+---
+services:
+  mysql:
+    container_name: semaphore-mysql
+    image: docker.io/library/mysql:8.4
+    restart: unless-stopped
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    hostname: mysql
+    volumes:
+      - semaphore-mysql:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - semaphore
+
+  semaphore:
+    container_name: semaphore
+    image: docker.io/semaphoreui/semaphore:latest
+    depends_on:
+      - mysql
+    restart: unless-stopped
+    user: "${UID}:${GID}"
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    volumes:
+      - /home/hughboi/data/semaphore/inventory/:/inventory:ro
+      - home/hughboi/data/semaphore/authorized-keys/:/authorized-keys:ro
+      - home/hughboi/data/semaphore/config/:/etc/semaphore:rw
+    environment:
+      - SEMAPHORE_DB_USER=${MYSQL_USER}
+      - SEMAPHORE_DB_PASS=${MYSQL_PASSWORD}
+      - SEMAPHORE_DB_HOST=mysql
+      - SEMAPHORE_DB_PORT=3306
+      - SEMAPHORE_DB_DIALECT=mysql
+      - SEMAPHORE_DB=${MYSQL_DATABASE}
+      - SEMAPHORE_PLAYBOOK_PATH=/tmp/semaphore/
+      - SEMAPHORE_ADMIN_PASSWORD=${SEMAPHORE_ADMIN_PASSWORD}
+      - SEMAPHORE_ADMIN_NAME=${SEMAPHORE_ADMIN_NAME}
+      - SEMAPHORE_ADMIN_EMAIL=${SEMAPHORE_ADMIN_EMAI}
+      - SEMAPHORE_ADMIN=${SEMAPHORE_ADMIN_NAME}
+      - SEMAPHORE_ACCESS_KEY_ENCRYPTION=${SEMAPHORE_ACCESS_KEY_ENCRYPTION}  # add to your access key encryption !
+      - ANSIBLE_HOST_KEY_CHECKING=false  # (optional) change to true if you want to enable host key checking
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.semaphore.entrypoints=http"
+      - "traefik.http.routers.semaphore.rule=Host(`semaphore.hughboi.cc`)"
+      - "traefik.http.middlewares.semaphore-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.semaphore.middlewares=semaphore-https-redirect"
+      - "traefik.http.routers.semaphore-secure.entrypoints=https"
+      - "traefik.http.routers.semaphore-secure.rule=Host(`semaphore.hughboi.cc`)"
+      - "traefik.http.routers.semaphore-secure.tls=true"
+      - "traefik.http.routers.semaphore-secure.service=semaphore"
+      - "traefik.http.services.semaphore.loadbalancer.server.port=3000"
+      - "traefik.docker.network=proxy"  
+    networks:
+      - proxy
+      - semaphore
+
+
+volumes:
+  semaphore-mysql:
+    driver: local
+
+networks:
+  proxy:
+    external: true
+  semaphore:
+    internal: true
