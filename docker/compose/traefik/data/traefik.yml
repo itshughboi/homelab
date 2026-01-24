@@ -33,7 +33,7 @@ providers:
 certificatesResolvers:
   cloudflare:
     acme:
-      email: CHANGEME@changeme.com
+      email: ### ADD EMAIL (EMAIL ASSOCIATED TO CLOUDFLARE) HERE
       storage: acme.json
       caServer: https://acme-v02.api.letsencrypt.org/directory # prod (default)
       #caServer: https://acme-staging-v02.api.letsencrypt.org/directory # staging

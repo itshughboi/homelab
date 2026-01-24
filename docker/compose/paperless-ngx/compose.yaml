@@ -1,0 +1,106 @@
+services:
+  webserver:
+    container_name: paperless-webserver
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+      - gotenberg
+      - tika   
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    volumes:
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media # where uplaoded files through GUI live
+      - export:/usr/src/paperless/export
+      - /mnt/truenas/paperless:/usr/src/paperless/consume # this is the only path I need to change. NFS import
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db   
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_URL: https://paperless.hughboi.cc
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperless.entrypoints=http"
+      - "traefik.http.routers.paperless.rule=Host(`paperless.hughboi.cc`)"
+      - "traefik.http.middlewares.paperless-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.paperless.middlewares=paperless-https-redirect"
+      - "traefik.http.routers.paperless-secure.entrypoints=https"
+      - "traefik.http.routers.paperless-secure.rule=Host(`paperless.hughboi.cc`)"
+      - "traefik.http.routers.paperless-secure.tls=true"
+      - "traefik.http.routers.paperless-secure.service=paperless"
+      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
+      - "traefik.docker.network=proxy"
+    networks:
+      paperless:
+      proxy:
+
+
+  db:
+    container_name: paperless-db
+    image: docker.io/library/postgres:15
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${PAPERLESS_DBPASS}
+    networks:
+      paperless:
+
+
+  gotenberg:
+    container_name: paperless-gotenerg  
+    image: docker.io/gotenberg/gotenberg:latest
+    restart: unless-stopped
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+    networks:
+      paperless:
+
+
+  broker:
+    container_name: paperless-broker  
+    image: docker.io/library/redis:7
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    networks:
+      paperless:
+
+
+  tika:
+    container_name: paperless-tika  
+    image: ghcr.io/paperless-ngx/tika:latest
+    restart: unless-stopped
+    networks:
+      paperless:
+
+
+volumes:
+  data:
+  redisdata:
+  export:
+  media:
+  pgdata:
+
+networks:
+  paperless:
+  proxy:
+    external: true

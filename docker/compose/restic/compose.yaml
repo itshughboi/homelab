@@ -31,8 +31,8 @@ services:
    
 
   prune:
-    image: mazzolino/restic
     container_name: restic-prune
+    image: mazzolino/restic
     hostname: ubnt-prod
     security_opt:
       - no-new-privileges:true    
@@ -45,8 +45,8 @@ services:
 
 
   check:
-    image: mazzolino/restic
     container_name: restic-check
+    image: mazzolino/restic
     hostname: ubnt-prod
     security_opt:
       - no-new-privileges:true    

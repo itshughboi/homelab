@@ -1,0 +1,191 @@
+services:
+
+  # cadvisor:
+  #   container_name: cadvisor
+  #   image: gcr.io/cadvisor/cadvisor:latest 
+  #   restart: unless-stopped  
+  #   devices:
+  #     - /dev/kmsg
+  #   privileged: true
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:ro
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #     - /dev/disk/:/dev/disk:ro
+  #   ports:
+  #     - 8073:8080
+  #   networks:
+  #     - promgraftail
+  #     - proxy
+
+
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:main
+    restart: unless-stopped  
+    user: "0" # << gives permission to write to grafana. Probably should be 1000 to not run as root but ran into an issue
+    networks:
+      - promgraftail
+      - proxy
+    volumes:
+    - /home/hughboi/data/grafana:/var/lib/grafana
+    environment:
+    - GF_ANALYTICS_REPORTING_ENABLED=false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.entrypoints=http"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.hughboi.cc`)"
+      - "traefik.http.routers.grafana.middlewares=default-whitelist@file"
+      - "traefik.http.middlewares.grafana-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.grafana.middlewares=grafana-https-redirect"
+      - "traefik.http.routers.grafana-secure.entrypoints=https"
+      - "traefik.http.routers.grafana-secure.rule=Host(`grafana.hughboi.cc`)"
+      - "traefik.http.routers.grafana-secure.tls=true"
+      - "traefik.http.routers.grafana-secure.service=grafana"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.docker.network=proxy"
+
+
+  influxdb:           #this is push so things can write to it
+    container_name: influxdb
+    image: influxdb:2.7
+    restart: unless-stopped
+    user: "1000"
+    volumes:
+      - /home/hughboi/data/influxdb:/var/lib/influxdb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.influxdb.entrypoints=http"
+      - "traefik.http.routers.influxdb.rule=Host(`influxdb.hughboi.cc`)"
+      - "traefik.http.routers.influxdb.middlewares=default-whitelist@file"
+      - "traefik.http.middlewares.influxdb-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.influxdb.middlewares=influxdb-https-redirect"
+      - "traefik.http.routers.influxdb-secure.entrypoints=https"
+      - "traefik.http.routers.influxdb-secure.rule=Host(`influxdb.hughboi.cc`)"
+      - "traefik.http.routers.influxdb-secure.tls=true"
+      - "traefik.http.routers.influxdb-secure.service=influxdb"
+      - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
+      - "traefik.docker.network=proxy"
+    ports:
+      - 8086:8086
+      - 8089:8089/udp
+    networks:
+      - promgraftail
+      - proxy
+
+
+  loki:
+    container_name: loki
+    image: grafana/loki:3.4.2
+    restart: unless-stopped
+    command: "-config.file=/etc/loki/config.yaml"
+    user: "1000:1000"
+    volumes:
+      - /home/hughboi/code/promgraftail/loki/config.yaml:/etc/loki/config.yaml:ro
+      - /home/hughboi/data/loki/data:/loki:rw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.loki.entrypoints=http"
+      - "traefik.http.routers.loki.rule=Host(`loki.hughboi.cc`)"
+      - "traefik.http.middlewares.loki-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.loki.middlewares=loki-https-redirect"
+      - "traefik.http.routers.loki-secure.entrypoints=https"
+      - "traefik.http.routers.loki-secure.rule=Host(`loki.hughboi.cc`)"
+      - "traefik.http.routers.loki-secure.tls=true"
+      - "traefik.http.routers.loki-secure.service=loki"
+      - "traefik.http.services.loki.loadbalancer.server.port=3100"
+      - "traefik.docker.network=proxy"
+    ports:
+      - 3100:3100
+    networks:
+      - proxy
+      - promgraftail
+
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command: "--config.file=/etc/prometheus/prometheus.yaml --web-enable-remote-write-receiver"
+    volumes:
+      - /home/hughboi/code/promgraftail/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /home/hughboi/code/promgraftail/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml
+    ports:
+      - 9070:9090  
+    networks:
+      - promgraftail
+      # - proxy
+
+
+
+  alertmanager:
+    container_name: alertmanager
+    image: quay.io/prometheus/alertmanager
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+    logging:
+      driver: loki
+      options:
+        loki-url: https://loki.hughboi.cc/loki/api/v1/push
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: non-blocking
+    volumes:
+      - /home/hughboi/code/promgraftail/prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - 9093:9093
+    networks:
+      - promgraftail
+      - proxy
+
+  
+
+
+  promtail:     #stores logs
+    container_name: promtail
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - /var/log:/var/log   #system logs from docker host. promtail -> loki -> grafana
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/hughboi/promgraftail/promtail/config.yaml:/etc/promtail/promtail-config.yml
+      - /home/hughboi/adguard/unbound/unbound.log:/etc/unbound/unbound.log # < i can either do this, or in unbound.conf I can put logfile to be to /dev/stdout instead, and then scrape from /home/hughboi/docker/data/adguard/unbound/dev/stdout and it will get logs from there
+    ports:
+      - "1541:1514" # this is only needed if you are going to send syslogs
+    networks:
+      - promgraftail
+
+
+
+  telegraf:     # this is pull so it can collect from sources
+    container_name: telegraf
+    image: telegraf:1.32.3
+    restart: unless-stopped
+    user: telegraf:988 #telegraf:1000 #you need to find the GID of Docker if not added to Sudo group
+    volumes:
+        - /home/hughboi/code/promgraftail/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+        - '/:/hostfs:ro' # to monitor docker-vm
+        - '/var/run/docker.sock:/var/run/docker.sock' # to monitor docker containers
+        - /home/hughboi/data/promgraftail/mibs:/usr/share/snmp/mibs # mibs files [e.g., sophos]
+    environment:
+        - HOST_ETC=/hostfs/etc
+        - HOST_PROC=/hostfs/proc
+        - HOST_SYS=/hostfs/sys
+        - HOST_VAR=/hostfs/var
+        - HOST_RUN=/hostfs/run
+        - HOST_MOUNT_PREFIX=/hostfs
+    networks:
+      - promgraftail
+
+
+networks:
+  promgraftail:
+  proxy:
+    external: true

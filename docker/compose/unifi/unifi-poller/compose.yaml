@@ -1,8 +1,8 @@
 services:
   unifi-poller:
     container_name: unfii-poller
-    restart: always
     image: ghcr.io/unpoller/unpoller:${POLLER_TAG}
+    restart: always
     logging:
       driver: loki
       options:
@@ -13,10 +13,10 @@ services:
         keep-file: "true"
         mode: "non-blocking"
     environment:
-      - UP_INFLUXDB_DISABLE=true    # using prometheus instead of influx
-      - UP_POLLER_DEBUG=true        # greater log output
+      - UP_INFLUXDB_DISABLE=true                  # using prometheus instead of influx
+      - UP_POLLER_DEBUG=true                      # greater log output
       - UP_UNIFI_DYNAMIC=false
-
+      ### Prometheus
       - UP_PROMETHEUS_HTTP_LISTEN=0.0.0.0:9130    # Published endpoint for Promeheus to scrape
       - UP_PROMETHEUS_NAMESPACE=unpoller          # DONT CHANGE THIS NAMESPACE. DASHBOARD QUEREIES WILL UTILIZE THIS SPECIFIC NAMESPACE. If not using, no data will visualize
 

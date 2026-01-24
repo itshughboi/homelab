@@ -12,7 +12,7 @@ This will match the permissions with the UID and GID of elasticsearch process wi
 *** 
 <br>
 
-#### Truenas Connection
+## Truenas Connection
 
 1. Mounting locally via NFS
 ```sh
