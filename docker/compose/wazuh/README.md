@@ -55,8 +55,8 @@ Hamburger Menu -> Server Management -> Settings -> Edit Configuration (Top right
 
       2. Then run the following:
         ```
-        sudo chmod 750 ./wazuh_integrations/custom-*
-        sudo chown root:wazuh ./wazuh_integrations/custom-*
+        sudo chmod 750 /home/hughboi/data/wazuh/integrations/custom-*
+        sudo chown root:wazuh /home/hughboi/data/wazuh/integrations/custom-*
         ```
       3. Then get the python extension <br>
         ```
