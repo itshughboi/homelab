@@ -17,9 +17,11 @@ Host gitea.hughboi.cc
   HostName gitea.hughboi.cc
   User git
   Port 222
-  IdentityFile ~/.ssh/id_rsa # optional
+  IdentityFile ~/.ssh/id_ed25519 # optional
   IdentitiesOnly yes # optional
 ```
+- This also adds this to the ~/.ssh/config file on your cliend (ubnt-prod e.g.)
+
 ## Git Process
 1. Git clone
 2. Cd into repository
