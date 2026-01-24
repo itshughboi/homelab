@@ -25,7 +25,7 @@ pve-srv-4           IN      A       10.10.10.4
 truenas             IN      A       10.10.10.5
 pbs                 IN      A       10.10.10.6                      ; Port 8007 - Proxmox Backup Server
 postgres            IN      A       10.10.10.7                      ; Port 5432
-automation          IN	    A	    10.10.10.8
+ansible             IN	    A	    10.10.10.8
 bind9               IN      A       10.10.10.9
 ubnt-prod           IN      A       10.10.10.10
 

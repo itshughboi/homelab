@@ -47,5 +47,5 @@ sudo chmod 755 ./cache
 ### Root Files
 - I configured Unbound to reference a local copy of the root servers rather than asking Cloudflare for them. Run this command to get the most up to date root servers:
 ```sh
-wget -O /home/hughboi/adguard/unbound/root.hints https://www.internic.net/domain/named.cache
+wget -O /home/hughboi/code/adguard/unbound/root.hints https://www.internic.net/domain/named.cache
 ```

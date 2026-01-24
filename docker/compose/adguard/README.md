@@ -87,3 +87,4 @@ TL;DR
 5. how to have these ci/cd oriented and then apply to container so i can push changes, commit, apply, rebuild.
 6. lock down key files for bind9 to least access
 7. update my records
+8. Automate root hints file every few months or so

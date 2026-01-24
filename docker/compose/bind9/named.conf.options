@@ -24,7 +24,7 @@ options {
 	   
 
 allow-query {            // If not on this list, Bind will **refuse** the query
-        10.150.0.0/16;   // AvidBit
+        10.150.0.0/16;   // Work
         10.0.0.0/24;     // Family network   
         tailscale;
         home-vlans;

@@ -16,8 +16,8 @@ ns1                 IN      A       10.10.10.9	    ; local server IP
 *                   IN      A       10.10.30.75     ; Wildcard for subdomains of hughboi.cc -> NGINX
 
 ;production-servers
-ansible              IN	    A	    10.10.10.8
-bind9               IN      A       10.10.10.9
+ansible              IN	     A	     10.10.10.8
+bind9                IN      A       10.10.10.9
 ;pihole              IN      A       10.10.30.69
 
 ; test dig/nslookup

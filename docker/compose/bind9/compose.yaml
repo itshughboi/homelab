@@ -2,6 +2,7 @@ services:
   bind9:
     container_name: bind9 
     image: ubuntu/bind9:9.18-23.10_beta
+    restart: always
     # PUID: 1000
     # PUIG: 1000
     # user: "1000"

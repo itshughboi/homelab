@@ -54,11 +54,11 @@ services:
       - no-new-privileges:true
     volumes:
       - /home/hughboi/data/adguard/unbound/:/opt/unbound/etc/unbound
-    ports:
-      - 5335:53/tcp
-      - 5335:53/udp
     healthcheck:
       test: ["NONE"]
+    ports:
+      - 5335:53/tcp
+      - 5335:53/udp  
     networks:
       unbound:
         ipv4_address: 192.168.100.10
