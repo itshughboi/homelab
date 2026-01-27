@@ -1,0 +1,41 @@
+services:
+  gatus:
+    container_name: gatus    
+    image: twinproduction/gatus:latest
+    restart: unless-stopped
+    logging:
+      driver: loki
+      options:
+        loki-url: "https://loki.hughboi.cc/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    dns:
+      - "10.10.10.9"  # specify bind9 so it can resolve hostnames.
+      - "10.10.10.10"
+    volumes:
+      - /home/hughboi/code/gatus/config:/config      
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gatus.entrypoints=http"
+      - "traefik.http.routers.gatus.rule=Host(`gatus.hughboi.cc`)"
+      - "traefik.http.middlewares.gatus-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.gatus.middlewares=gatus-https-redirect"
+      - "traefik.http.routers.gatus-secure.entrypoints=https"
+      - "traefik.http.routers.gatus-secure.rule=Host(`gatus.hughboi.cc`)"
+      - "traefik.http.routers.gatus-secure.tls=true"
+      - "traefik.http.services.gatus.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+
+networks:
+  proxy:
+    external: true
