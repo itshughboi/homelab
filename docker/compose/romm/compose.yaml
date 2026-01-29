@@ -29,6 +29,8 @@ services:
       - IGDB_CLIENT_ID=${IGDB_CLIENT_ID} # Generate an ID and SECRET in IGDB
       - IGDB_CLIENT_SECRET=${IGDB_CLIENT_SECRET} # https://api-docs.igdb.com/#account-creation
       - STEAMGRIDDB_API_KEY=${STEAMGRIDDB_API_KEY} # https://github.com/rommapp/romm/wiki/Generate-API-Keys#steamgriddb
+      - HASHEOUS_API_ENABLED=true # needed for Retro Achievments
+      - RETROACHIEVEMENTS_API_KEY=${RETROACHIEVEMENTS_API_KEY} # Create account for Hasheous and copy out the API token
     labels:
       - traefik.enable=true
       - traefik.http.routers.romm.entrypoints=http
