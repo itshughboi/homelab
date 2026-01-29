@@ -27,3 +27,7 @@ Known working config:
 | enp4s0 | Network Device | N         | N          |              |               |            | 1 GbE   |
 | vmbr0  | Linux Bridge   | Y         | N          | eno1         | 10.10.10.3/24 | 10.10.10.1 | LAN     |
 | vmbr1  | Linux Bridge   | Y         | N          | enp4s0       |               |            | WAN     |
+
+
+## Monitoring w/Prometheus, Alloy, & Grafana
+See this video from Christian Lempa: https://www.youtube.com/watch?v=F3mvWIPTPjY
