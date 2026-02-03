@@ -10,3 +10,10 @@
 ### Passkeys
 - Upon initial setup you will be asked to setup a Passkey. You can setup either a Passkey within Bitwarden, Touch ID on Macbook, or a Yubikey.
 - To add additional passkeys go to **Settings** -> **My Account** -> **Passkeys** -> A**dd Passkey**
+
+### Portainer OIDC
+1. Create Proxmox Application in Pocket from instructions above
+2. On Proxmox go to **Datacenter** -> **Permissions** -> **Realms** -> Add -> **OpenID Connect Server**. Put in the details generated from Pocket-ID. Name it something like *pocket* or *oidc*. Don't need to do anything else.
+3. Still in Proxmox go to **Datacenter** -> **Permissions** -> **Users** -> **Add**. Assign it to the Pocket Realm we created in step 2 (no password)
+4. Assign permissions by going to **Datacenter** -> **Permissions** -> **Add** -> **User Permission** 
+5. Now when you login you will be able to select the *pocket* realm and sign in with passkey
