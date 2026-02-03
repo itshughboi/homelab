@@ -12,8 +12,16 @@
 - To add additional passkeys go to **Settings** -> **My Account** -> **Passkeys** -> A**dd Passkey**
 
 ### Proxmox OIDC
-1. Create Proxmox Application in Pocket from instructions above
-2. On Proxmox go to **Datacenter** -> **Permissions** -> **Realms** -> Add -> **OpenID Connect Server**. Put in the details generated from Pocket-ID. Name it something like *pocket* or *oidc*. Don't need to do anything else.
-3. Still in Proxmox go to **Datacenter** -> **Permissions** -> **Users** -> **Add**. Assign it to the Pocket Realm we created in step 2 (no password)
-4. Assign permissions by going to **Datacenter** -> **Permissions** -> **Add** -> **User Permission** 
-5. Now when you login you will be able to select the *pocket* realm and sign in with passkey
+1. Create Proxmox Application in Pocket from instructions above. Make sure the **Client Launch URL** specifies the port *8006*
+    e.g. - https://10.10.10.1:8006 or https://pve-srv-1.hughboi.cc:8006
+2. If I don't already have a User Group created in Pocket, do that first. Then on the OIDC Client under **Allowed User Groups**, speicfy that group. << Currently not working. To get this to work I have to remove the Allowed User Groups else I get a "you're not authorized to sign in" message from Pocket
+3. On Proxmox go to **Datacenter** -> **Permissions** -> **Realms** -> Add -> **OpenID Connect Server**.
+    Issuer URL: https://pocket.hughboi.cc
+    Realm: Name it something like **pocket**
+    Client ID: Generated from Pocket
+    Client Key: Generated from Pocket
+    Autocreate Users: Checked << This is important
+    Username Claim: Username << otherwise it generates a user with a UID
+4. Sign out of Proxmox and sign into the realm once. This will create the user.
+5. Sign out and back in with admin account. You will see under Proxmox Users the newly created user for that Realm. Click on the **Permissions** parent tab and grant permissions to this user
+7. Now when you login you will be able to select the *pocket* realm and sign in with passkey
