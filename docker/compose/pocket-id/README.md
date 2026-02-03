@@ -15,7 +15,7 @@
 
 Use these settings to enable Single Sign-On (SSO) and Passkey support for Proxmox VE via Pocket ID.
 
----
+--- <br> <br>
 
 #### 1. Pocket ID Configuration
 * **Create Application:** Use the OIDC template in Pocket.
