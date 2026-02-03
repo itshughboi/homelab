@@ -24,3 +24,56 @@ GitHub: https://github.com/itshughboi/iac/blob/main/ansible/playbooks/kubernetes
 | pihole-vip       | 10.10.30.69 |
 | .                |             |
 | End MetalLB      | 10.10.30.99 |
+
+
+
+***
+
+#### Services
+
+**Monitoring**
+- Gatus
+- Grafana / Alloy
+- Prometheus
+- Loki
+- ntfy
+- Mailrise
+
+
+**Networking**
+- Unifi
+- Adguard
+- Traefik 
+
+**Management**
+- Gitea / Gitlab
+- Renovate
+- Rancher
+- Homepage
+
+**Automation**
+- Home Assistant
+- n8n
+
+**Files**
+- Filebrowser
+- Paperless-ngx
+
+
+**Personal**
+- Fasten Health
+- Hoarder / Karakeep
+- Mealie
+- Searxng
+- Vaultwarden
+- Change Detection
+- Syncthing
+- Pocket ID / Authentik
+- Wazuh
+- Immich
+- Jellyfin
+- FreshRSS
+- Romm
+- YT Archive
+- Soulseek / Torrent
+
