@@ -11,7 +11,7 @@
 - Upon initial setup you will be asked to setup a Passkey. You can setup either a Passkey within Bitwarden, Touch ID on Macbook, or a Yubikey.
 - To add additional passkeys go to **Settings** -> **My Account** -> **Passkeys** -> A**dd Passkey**
 
---- <br> <br>
+*** <br> <br>
 
 ### 🔐 Proxmox OIDC Integration with Pocket ID
 
