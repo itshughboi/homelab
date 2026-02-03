@@ -58,7 +58,8 @@ Because Proxmox cannot "pre-sync" users from Pocket, you must follow this two-st
 
 
 <br>
-### SMTP Settings
+
+### SMTP Setup
 
 1. Email of admin account HAS to be **notify@mailrise.xyz**. That's how it determines source destination.
 2. Go to **Settings** -> **Administration** -> **Application Configuration** -> **SMTP Configuration**
