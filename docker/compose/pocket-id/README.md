@@ -11,42 +11,47 @@
 - Upon initial setup you will be asked to setup a Passkey. You can setup either a Passkey within Bitwarden, Touch ID on Macbook, or a Yubikey.
 - To add additional passkeys go to **Settings** -> **My Account** -> **Passkeys** -> A**dd Passkey**
 
-### Proxmox OIDC Setup via Pocket
+# 🔐 Proxmox OIDC Integration with Pocket ID
 
-Setting up OpenID Connect allows for seamless, secure logins (like passkeys) into your Proxmox VE environment.
-1. Pocket Configuration
+Use these settings to enable Single Sign-On (SSO) and Passkey support for Proxmox VE via Pocket ID.
 
-    Create Application: Use the instructions provided in your Pocket instance.
+---
 
-    Client Launch URL: Must include the port 8006.
+## 1. Pocket ID Configuration
+* **Create Application:** Use the OIDC template in Pocket.
+* **Client Launch URL:** `https://<YOUR-IP-OR-FQDN>:8006`
+* **Allowed User Groups:** > ⚠️ **Note:** If you get an "Unauthorized" error, ensure your OIDC Scopes include `groups`. If issues persist, remove restrictions here and manage access via Proxmox permissions.
 
-        Example: https://10.10.10.1:8006 or https://pve-srv-1.hughboi.cc:8006
+## 2. Proxmox Realm Setup
+Go to **Datacenter -> Permissions -> Realms -> Add -> OpenID Connect Server**.
 
-    Groups: If a dedicated User Group doesn't exist, create one now.
+| Field | Configuration |
+| :--- | :--- |
+| **Issuer URL** | `https://pocket.hughboi.cc` |
+| **Realm** | `pocket` (or preferred name) |
+| **Client ID** | *From Pocket* |
+| **Client Key** | *From Pocket* |
+| **Autocreate Users** | **Checked** ✅ |
+| **Username Claim** | `username` |
+| **Scopes** | `openid email profile` |
 
-    Allowed User Groups: Add your group here.
+## 3. The Provisioning Process
+Because Proxmox cannot "pre-sync" users from Pocket, you must follow this two-step process to establish the account and permissions:
 
-        ⚠️ Troubleshooting: If you receive an "Unauthorized" message, ensure the Scopes in your client include groups or profile so the group claim is passed.
+### Step A: The Initial Handshake (User Creation)
+1. Logout of Proxmox.
+2. On the login screen, change the **Realm** to `pocket`.
+3. Sign in using your Passkey/Pocket credentials.
+4. **Expected Result:** You will log in but see "No Permission" or an empty dashboard. This is normal; Proxmox has now successfully created the user entry in its database.
 
-2. Proxmox Configuration
+### Step B: Granting Permissions
+1. Sign out and sign back in using the **root@pam** (local admin) account.
+2. Navigate to **Datacenter -> Permissions**.
+3. Click **Add -> User Permission**.
+4. Set **Path** to `/` (or specific resource).
+5. Select the newly created user (e.g., `hughboi@pocket`).
+6. Set **Role** to `Administrator`.
 
-Navigate to Datacenter > Permissions > Realms > Add > OpenID Connect Server.
-Field	Value/Setting
-Issuer URL	https://pocket.hughboi.cc
-Realm	pocket (or your preferred name)
-Client ID	From Pocket
-Client Key	From Pocket
-Autocreate Users	Checked (Required for first-time login)
-Username Claim	username (Prevents UID-based naming)
-Scopes	openid email profile
-3. User Provisioning & Permissions
+---
 
-    Initial Sync: Sign out of Proxmox. Log back in using the Pocket realm. This triggers the "Autocreate" function.
-
-    Elevate Permissions: * Sign out and log back in as a Proxmox Admin (root@pam).
-
-        Go to Permissions > Add > User Permission.
-
-        Select your newly created user (e.g., hugh@pocket) and assign the appropriate role (e.g., Administrator or PVEVMAdmin).
-
-    Final Test: Log out and sign back in via the Pocket realm using your passkey.
+**Now, you can log in exclusively through the Pocket realm with full access.**
