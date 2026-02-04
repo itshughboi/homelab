@@ -128,3 +128,73 @@
 1. Get DNSEC support
 2. Enable DoH/DoT or even better DoQ if available. 
 	1. See how unbound handles this and what all needs to be configured both on adguard and on unbound
+
+
+
+### To-Do
+***
+##### Adguard
+1. Setup DoH/DoT
+2. Setup Adguard-sync so I can have another replica
+3. Think about switching DNS to be a VIP pointing to both this adguard + another one elsewhere
+
+
+##### Gitea
+1. Change database from HA Postgres to a container
+3. Connect with Renovate bot if it's compatible
+
+
+#### Grafana
+- Move promtail over to Grafana Alloy
+
+
+#### Homepage
+- Get crowdsec integration at least tested and put into gitea even if i comment it out
+
+
+##### Kestra
+1. Take a look on how I can use this in my workflow
+
+
+##### Loki
+1. Add Authentic middleware for machine to machine authentication for logs
+2. Fix my promtail /var/logs push - TLS error
+3. Add env variables for Loki api call
+4. Adjust Wazuh labels
+5. Add redis to searxng (optionally add Mullvad via Gluetun config to route all traffic through)
+
+
+##### OpenTofu
+1. Setp all mt files and providers so that I can start using this to provision machines and states
+2. Connect Terraform to Proxmox to provision VM's and LXC's
+
+
+#### Prometheus
+- Setup Alert Manager & Node Exporter on my hosts so that I can monitor everything
+- Setup Exporter with my Bind9 and configure Grafana Dashboard
+- Setup Exporter with unbound DNS and configure Grafana Dashboard
+
+
+##### Semaphore
+1. Connect Semaphore with my git repository hosting my ansible files.
+2. Integrate with OpenTofu
+
+
+##### Speedtest-tracker
+1. Add to InfluxDB and setup Grafana graph for it
+
+
+##### TrueNAS
+1. Setup backups from Windows to TrueNAS via FileHistory
+
+
+#### Watchtower
+1. Bring watchtower into Grafana via Prometheus
+
+##### Wazuh
+1. Setup the ansible script it provides and use inventory file to setup all agents for it to be installed on. Integrate this with OpenTofu for full stack automation
+2. Get logs from Unifi working properly
+3. Change password of admn user
+4. Add all my agents/vm's to Wazuh + utilize Docker plugin for containers
+5. Make sure notifications are set up with correct thresholds
+
