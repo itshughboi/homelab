@@ -12,15 +12,16 @@
 
 ###### VLANs
 
-| VLAN     | ID  | Network         | Notes                          |
-| -------- | --- | --------------- | ------------------------------ |
-| Home     | 1   | 10.10.10.0/24   | Proxmox, Unifi, Bind9, Truenas |
-| Swarm    | 2   | 10.10.20.0/24   | Swarm                          |
-| k3s      | 3   | 10.10.30.0/24   | Masters + Workers, Longhorn    |
-| VPN      | 8   | 10.10.80.0/24   | VPN                            |
-| Testing  | 200 | 10.200.200.0/24 |                                |
-| Ad-Block | 111 | 10.10.111.0/24  | IoT and guests for Adblock DNS |
-| torrent  | 49  | 172.16.20.0/24  | torrent + mullvad              |
+| Name         | VLAN ID | CIDR           | Notes                  |
+| ------------ | ------- | -------------- | ---------------------- |
+| Management   | 1       | 10.10.10.0/24  | SSH, Web UI, Unifi, Bind9
+| Cluster      | 2       | 10.10.20.0/24  | Corosync               | 
+| k3s          | 3       | 10.10.30.0/24  |                        |   
+| Storage      | 4       | 10.10.40.0/24  | TrueNAS, PBS, Longhorn |
+| VPN          | 8       | 10.10.80.0/24  | Tailscale              |
+| Torrent      | 49      | 172.16.49.0/24 |                        |
+| Provisioning | 99      | 10.10.99.0/24  | Netboot                |
+
 ***
 **Notes:** Ports that connect to Proxmox nodes, trunked devices, or managed switches (Unifi) should all be set to **trunk** or **allow all VLANs**. Configure VLANs on both Proxmox hosts under the virtual NIC (assign the VLAN to a bridge interface which binds to a specific port) and then that bridge will carry the VLAN for that VM.
 ***
