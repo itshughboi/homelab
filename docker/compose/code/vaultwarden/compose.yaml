@@ -1,7 +1,7 @@
 services:
   server:
     container_name: vaultwarden
-    image: vaultwarden/server:1.35.6
+    image: vaultwarden/server:1.35.7    # https://hub.docker.com/r/vaultwarden/server/tags
     security_opt:
       - no-new-privileges:true
       - apparmor:unconfined

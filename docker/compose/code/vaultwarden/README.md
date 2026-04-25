@@ -207,7 +207,7 @@ Note! Always test restores. To restore, unzip the archive back into /data, repla
 mv /home/hughboi/data/vaultwarden/data /home/hughboi/data/vaultwarden/data.broken.$(date +%F)
 mkdir -p /home/hughboi/data/vaultwarden/data
 ```
-3.Decrypt backup — note: change ~/.config/age/keys.txt to location of key file and cd into backups directory
+3. Decrypt backup — note: change ~/.config/age/keys.txt to location of key file and cd into backups directory
 ```sh
 age -d -i ~/.config/age/keys.txt vaultwarden-YYYY-MM-DD.tar.gz.age > vaultwarden.tar.gz
 ```
@@ -247,12 +247,14 @@ docker exec -it restic restic restore SNAPSHOT_ID \
   --target /tmp-for-restore \
   --include /mnt/volumes/data/vaultwarden/data/db.sqlite3
 ```
-Note: Restic ignores lchown errors on NFS mounts; as long as it says "Summary: Restored 1 files", it worked
+Note: Restic ignores lchown errors on NFS mounts; as long as it says "Summary: Restored 1 files", it worked \
+
 3. Integrity check
 ```sh
 sqlite3 /mnt/truenas/restic/tmp-for-restore/mnt/volumes/data/vaultwarden/data/db.sqlite3 "PRAGMA integrity_check;"
 ```
-CRITICAL: If the output is anything other than ok, STOP. Delete the temp file and go back to Step 1 with an older Snapshot ID.
+CRITICAL: If the output is anything other than ok, STOP. Delete the temp file and go back to Step 1 with an older Snapshot ID. \
+
 4. Once I see "ok" wipe corrupted directory and replace it
 ```sh
 # Stop the service
