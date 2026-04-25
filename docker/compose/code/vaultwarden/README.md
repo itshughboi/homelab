@@ -97,23 +97,34 @@ Keep this in 3+ places:
 
 
 
-# Backups + Restore
+# Backups
 Official documentation: https://github.com/dani-garcia/vaultwarden/wiki/Backing-up-your-vault \
 My setup:
 1. Proxmox Backup Server VM Image (1x daily)
 2. Restic -> TrueNAS (2x daily )
-3. Encrypted tar backup of /data to local folder via n8n (1x daily)
+3. Encrypted tar backup of /data to local folder via ansible (1x daily)
 
 
 ## Manual Backup
+NOTE! SHUT DOWN VAULTWARDEN FIRST \
+These manual commands don't utilize the proper  `sqlite3 backup` that my ansible playbooks utilize. As is, these are less safe than running the ansible playbook. If I do in fact want to run it manually, shut down container first!
 *Unencrypted*
 ```sh
-tar -czf /home/hughboi/data/vaultwarden/backups/vaultwarden-$(date +%F).tar.gz --exclude='./backups' -C /home/hughboi/data/vaultwarden .
+tar -czf /home/hughboi/data/vaultwarden/backups/vaultwarden-$(date +%F).tar.gz -C /home/hughboi/data/vaultwarden data
 ```
 *Encrypted + updated*
 ```sh
-DATE=$(TZ="America/Denver" date +%F) && TAR_FILE="/home/hughboi/data/vaultwarden/backups/vaultwarden-$DATE.tar.gz" && ENC_FILE="$TAR_FILE.age" && tar -czf "$TAR_FILE" --exclude='./backups' -C /home/hughboi/data/vaultwarden . && age -r YOUR_PUBLIC_KEY_HERE -o "$ENC_FILE" "$TAR_FILE" && rm "$TAR_FILE"
+DATE=$(TZ="America/Denver" date +%F) && TAR_FILE="/home/hughboi/data/vaultwarden/backups/vaultwarden-$DATE.tar.gz" && ENC_FILE="$TAR_FILE.age" && tar -czf "$TAR_FILE" -C /home/hughboi/data/vaultwarden data && age -R ~/.config/age/keys.txt -o "$ENC_FILE" "$TAR_FILE" && rm "$TAR_FILE"
 ```
+
+### No downtime manual backup
+```sh
+docker exec vaultwarden sqlite3 /data/db.sqlite3 ".backup '/data/db_backup.sqlite3'"
+```
+
+Then tar up the db_backup.sqlite3 instead of the live db.sqlite3
+
+<br>
 
 ##### Encryption Tutorial
 Note: Create ~/.config/age if not already created
@@ -125,7 +136,7 @@ sudo apt install age
 ```sh
 age-keygen -o ~/.config/age/keys.txt
 ```
-3. Save private key to Vaultwarden
+3. Save private key to Vaultwarden, iCloud, TrueNAS, and have printed physical copy.
 4. Ensure permission lock
 ```sh
 chmod 600 ~/.config/age/keys.txt
@@ -161,179 +172,64 @@ cd ~/backups || exit
 find . -type f -name '*.zip' ! -mtime -1 -exec rm {} +
 ```
 
+
+
+<br>
+
+
+
+## Ansible Backups
+Scheduled every day to run from an ansible playbook via semaphore
+
+
+<br>
+
+## Weekly Backup Testing
+Ansible playbook + Semaphore runs weekly. It finds the latest encrypted backup, verifies its checksum, decrypts it, stands up a test Vaultwarden container, and curls endpoints to confirm the backup is restorable.
+
+<br>
+
+# Restores
 Note! Always test restores. To restore, unzip the archive back into /data, replacing the previous data directory
 
-<br>
 
-
-
-## N8N Backups
-1. Schedule Trigger (8:00 am daily)
-2. Execute command
-    - Credentials to connect with (SSH Password account)
-    - Resource: Command
-    - Operation: Execute
-    - Command: (backups sqlite database + data folder, zips it, encrypts it, puts into local backups, purges anything over 45 days, calculates backup size)
-    ```sh
-    sqlite3 /home/hughboi/data/vaultwarden/data/db.sqlite3 ".backup /home/hughboi/data/vaultwarden/data/db-backup.sqlite3" && sync && BACKUP_DIR="/home/hughboi/data/vaultwarden/backups" && mkdir -p "$BACKUP_DIR" && DATE=$(TZ="America/Denver" date +%F) && TAR_FILE="$BACKUP_DIR/vaultwarden-$DATE.tar.gz" && ENC_FILE="$TAR_FILE.age" && tar --warning=no-file-changed -czf "$TAR_FILE" -C /home/hughboi/data/vaultwarden data && age -r age15zjkhtmytnx5l6fhhpte6gg5ha9ede28tgwcd2ewxtwth9l5090sve0rv6 -o "$ENC_FILE" "$TAR_FILE" && sha256sum "$ENC_FILE" > "$ENC_FILE.sha256" && rm "$TAR_FILE" && rm /home/hughboi/data/vaultwarden/data/db-backup.sqlite3 && LATEST=$(ls -t "$BACKUP_DIR"/vaultwarden-*.tar.gz.age | head -1) && SIZE=$(du -h "$LATEST" | awk '{print $1}') && PURGED=$(find "$BACKUP_DIR" \( -name "*.tar.gz.age" -o -name "*.tar.gz.age.sha256" \) -type f -mtime +45 -print -delete | tr '\n' ' ') && printf "size=%s purged=%s\n" "$SIZE" "${PURGED:-None}"
-    ```
-    - Working Directory: /home/hughboi/
-    - Settings: ALYWAYS OUTPUT DATA / On Error (Continue)
-3. IF
-    - Condition: {{ $json.code }} is equal to **0** << True Route
-4. Success Path:
-    - HTTP Post to https://ntfy.hughboi.cc/n8n
-    - Body Content Type: Raw
-    - Send Body (Checked)
-
-        *Body*
-        ```sh
-        Vaultwarden backup completed!
-        Date/Time: {{ $now.format('yyyy-MM-dd HH:mm:ss') }}
-        Content: {{ $json.stdout }}
-        ```
-        
-5. Failure Path:
-    - *Body*
-        ```sh
-        Vaultwarden Backup FAILURE - {{ $now.format('yyyy-MM-dd HH:mm:ss') }}
-        Error: {{ $json.stderr }}
-        ```
-
-<br>
+🚨 CRITICAL RESTORE STEPS
+    1. Stop Container: docker stop vaultwarden  \
+    2. Verify Integrity: Run PRAGMA integrity_check; on any restored DB.    \
+    3. Fix Permissions: chown -R 1000:1000 is mandatory for the container to write to the DB.   
 
 
 ## Manual Restore
 1. Stop vaultwarden
 2. Move current data to new folder
+
 ```sh
 mv /home/hughboi/data/vaultwarden/data /home/hughboi/data/vaultwarden/data.broken.$(date +%F)
 mkdir -p /home/hughboi/data/vaultwarden/data
 ```
-3. Decrypt backup
-Note! change ~/.config/age/keys.txt to location of key file and cd into backups directory
+3.Decrypt backup — note: change ~/.config/age/keys.txt to location of key file and cd into backups directory
 ```sh
 age -d -i ~/.config/age/keys.txt vaultwarden-YYYY-MM-DD.tar.gz.age > vaultwarden.tar.gz
 ```
-3. Restore .tar.gz backup (Replace with file name)
+4. Extract archive
 ```sh
-tar -xzf /home/hughboi/data/vaultwarden/backups/vaultwarden-YYYY-MM-DD.tar.gz -C /home/hughboi/data/vaultwarden
+tar -xzf vaultwarden-YYYY-MM-DD.tar.gz -C /home/hughboi/data/vaultwarden
 ```
-4. Set permissions if needed
+5. Promote the hot backup as the canonical database
+- The archive contains both db.sqlite3 (live at time of backup, may have been mid-write) and db-backup.sqlite3 (clean consistent snapshot taken by the playbook). Always use the hot backup as your source of truth:
+
+```sh
+mv /home/hughboi/data/vaultwarden/data/db-backup.sqlite3 \
+   /home/hughboi/data/vaultwarden/data/db.sqlite3
+```
+7. Set permissions if needed
 ```sh
 chown -R 1000:1000 /home/hughboi/data/vaultwarden/data
 ```
-5. Start vaultwarden again
+8. Start vaultwarden
 
-<br>
 
-## Testing Restores with n8n
-- Node 1 Schedule
-    - 1x month
-- Node 2 SSH
-    - Find latest backup
-    ```sh
-    ls -t /home/hughboi/data/vaultwarden/backups/*.tar.gz.age | head -1
-    ```
-- Node 3 Code (Javascript)
-    - Data modification (Raw -> Structured)
-    ```sh
-    return [{
-    json: {
-        ...$json,
-        backup: $json.stdout.trim()
-    }
-    }];
-    ```
-- Node 4 SSH
-    - Decrypt backup (Expression)
-    ```sh
-    BACKUP="{{ $json.backup }}"
-    BACKUP_DIR=$(dirname "$BACKUP")
-    BACKUP_FILE=$(basename "$BACKUP")
-    TMP=$(mktemp -d)
 
-    # 1. Change to the directory so sha256sum finds the file correctly
-    cd "$BACKUP_DIR"
-
-    # 2. Verify Checksum
-    if ! sha256sum -c "$BACKUP_FILE.sha256" > /dev/null 2>&1; then
-        printf '{"status":"fail","error":"checksum_mismatch","backup":"%s"}' "$BACKUP"
-        exit 0
-    fi
-
-    # 3. Decrypt
-    if age -d -i ~/.config/age/keys.txt "$BACKUP_FILE" > "$TMP/vw.tar.gz" 2>/dev/null; then
-        printf '{"status":"ok","backup":"%s","tmp":"%s"}' "$BACKUP" "$TMP"
-    else
-        printf '{"status":"fail","error":"decryption_failed","backup":"%s"}' "$BACKUP"
-    fi
-    ```
-- Node 5 Code (Javascript)
-    - JSON parse -> object
-    ```sh
-    const data = JSON.parse($json.stdout);
-
-    return [{
-    json: {
-        backup: data.backup,
-        tmp: data.tmp.replace("tmp:", "")
-    }
-    }];
-    ```
-- Node 6 SSH
-    - Extract backup (Expressions)
-    ```sh
-    TMP="{{ $json.tmp }}" && tar -xzf "$TMP/vw.tar.gz" -C "$TMP" && printf "$TMP"   
-    ```
-- Node 7 Code (Javascript)
-    ```sh
-    for (const item of $input.all()) {
-    item.json.myNewField = 1;
-    }
-
-    return $input.all();
-    ```
-- Node 8 SSH
-    - Start vaultwarden test container (Expression)
-    ```sh
-    # 1. Setup path
-    TMP=$(echo "{{ $json.stdout }}" | head -n 1 | tr -d '"')
-
-    # 2. Start container and WAIT for it to be ready
-    docker run -d --rm --name vw-test -p 8093:80 -v "$TMP/data:/data" vaultwarden/server:latest > /dev/null
-    until curl -sf http://localhost:8093/alive > /dev/null; do sleep 1; done
-
-    # 3. RUN THE CHECKS while it is still running
-    STATUS="ok"
-    ERROR=""
-    if ! curl -sf http://localhost:8093/api/config > /dev/null; then 
-        ERROR="api_failed"
-    elif ! (sqlite3 "$TMP/data/db.sqlite3" "PRAGMA integrity_check;" || sqlite3 "$TMP/db.sqlite3" "PRAGMA integrity_check;") | grep -q "ok"; then 
-        ERROR="sqlite_failed"
-    fi
-
-    # 4. NOW TEARDOWN (Only after checks are done)
-    [ -n "$ERROR" ] && STATUS="fail"
-    docker stop vw-test > /dev/null || true
-
-    # 5. Output the result to n8n
-    printf '{"status":"%s","error":"%s","backup":"%s"}\n' "$STATUS" "$ERROR" "{{ $('Extract Path').item.json.backup }}"
-    ```
-- Node 9 IF
-    ```sh
-    {{ JSON.parse($('Start Test Container').item.json.stdout).status }} == ok
-    ``` 
-    - Success: 
-        - POST
-            - https://ntfy.hughboi.cc/n8n
-        - Send Body (Raw)
-            - Vaultwarden Restore Test PASSED | Backup={{ $json.backup }} | Time={{ $now }}
-    - Failure
-        - POST
-            - https://ntfy.hughboi.cc/n8n
-        - Send Body (Raw)
-            - Vaultwarden Restore Test FAILED | Error={{ $json.error }} | Backup={{ $json.backup }} | Time={{ $now }}
 
 
 
@@ -362,7 +258,7 @@ CRITICAL: If the output is anything other than ok, STOP. Delete the temp file an
 # Stop the service
 docker stop vaultwarden
 
-# Wipe the corrupted directory
+# Wipe the corrupted directory. MAKE SURE THAT YOU REMOVE .WAL AND SHM FILES!!!
 rm -rf /home/hughboi/data/vaultwarden/data/*
 
 # Move the verified DB into place
@@ -381,3 +277,7 @@ docker start vaultwarden
 ```
 
 <br>
+
+### Other
+- I run a `VACCUM` on sqlite.db once a year for good health maintenance of the database. This is orchestrated through ansible + semaphore
+
